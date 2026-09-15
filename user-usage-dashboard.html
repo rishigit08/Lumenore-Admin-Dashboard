@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumenore — your usage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+/* ==========================================================================
+   TOKENS — copied verbatim from usage-dashboard.html so the org dashboard and
+   this per-user self-view read as siblings. Light palette on :root; dark
+   overrides via prefers-color-scheme and via [data-theme] for the in-page
+   toggle. Tier + status colors are "r,g,b" triples so solid and faint (rgba)
+   uses derive from one token.
+   ========================================================================== */
+:root{
+  --bg:#FFFFFF;
+  --canvas:#FAFAFA;
+  --surface:#FFFFFF;
+  --surface-2:#F5F4F2;
+  --border:rgba(20,20,20,0.09);
+  --border-strong:rgba(20,20,20,0.16);
+  --text:#1A1A19;
+  --text-2:#63625D;
+  --text-3:#8B8A85;
+  --focus:#1A1A19;
+
+  --tier-1:124,58,196;   /* Analyst Pro */
+  --tier-2:15,133,120;   /* Creator */
+  --tier-3:196,90,58;    /* Explorer */
+  --tier-4:51,110,180;   /* Viewer */
+
+  --accent:100,110,128;
+  --tc:var(--accent);
+
+  --st-amber-tint:180,120,30;
+  --st-amber:181,95,20;
+  --st-red:178,48,42;
+  --free-fill:rgba(20,20,20,0.045);
+  --free-border:rgba(20,20,20,0.18);
+
+  --r-card:12px;
+  --r-ctrl:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181817; --canvas:#141413; --surface:#1F1F1E; --surface-2:#242423;
+    --border:rgba(255,255,255,0.10); --border-strong:rgba(255,255,255,0.20);
+    --text:#F0EFEC; --text-2:#ABA9A3; --text-3:#7C7A75; --focus:#F0EFEC;
+    --tier-1:176,140,235; --tier-2:92,196,182; --tier-3:230,150,120; --tier-4:130,175,230;
+    --accent:150,158,172;
+    --st-amber-tint:224,176,90; --st-amber:232,150,60; --st-red:235,110,102;
+    --free-fill:rgba(255,255,255,0.06); --free-border:rgba(255,255,255,0.22);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181817; --canvas:#141413; --surface:#1F1F1E; --surface-2:#242423;
+  --border:rgba(255,255,255,0.10); --border-strong:rgba(255,255,255,0.20);
+  --text:#F0EFEC; --text-2:#ABA9A3; --text-3:#7C7A75; --focus:#F0EFEC;
+  --tier-1:176,140,235; --tier-2:92,196,182; --tier-3:230,150,120; --tier-4:130,175,230;
+  --accent:150,158,172;
+  --st-amber-tint:224,176,90; --st-amber:232,150,60; --st-red:235,110,102;
+  --free-fill:rgba(255,255,255,0.06); --free-border:rgba(255,255,255,0.22);
+}
+
+*{box-sizing:border-box;}
+html{color-scheme:light dark;}
+html[data-theme="light"]{color-scheme:light;}
+html[data-theme="dark"]{color-scheme:dark;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--canvas); color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-weight:400; font-size:16px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+button,select,input{font-family:inherit;}
+button{cursor:pointer;}
+h1,h2,h3{margin:0; font-weight:500;}
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+
+/* ---------- Status-colored text / fill / stroke (the one scale, everywhere) ---------- */
+.st-neutral{ --sc:var(--tc); }
+.st-amber-tint{ --sc:var(--st-amber-tint); }
+.st-amber{ --sc:var(--st-amber); }
+.st-red{ --sc:var(--st-red); }
+.status-text{color:rgb(var(--sc));}
+
+/* ============================================================================
+   SHELL — pinned top bar. Here it carries the user's own identity, not the org.
+   ============================================================================ */
+.shell{position:sticky; top:0; z-index:20; background:var(--bg); border-bottom:0.5px solid var(--border);}
+.shell-inner{max-width:1320px; margin:0 auto; padding:16px 28px 14px;}
+.shell-row1{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+.user-id{display:flex; align-items:center; gap:12px; min-width:0;}
+.user-id .big-avatar{
+  width:40px; height:40px; border-radius:999px; background:rgba(var(--tc),0.14); color:rgb(var(--tc));
+  display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:500; flex-shrink:0;
+}
+.user-id .who{display:flex; flex-direction:column; gap:3px; min-width:0;}
+.user-name-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.user-name{font-size:16px; font-weight:500; color:var(--text);}
+.user-sub{font-size:12px; color:var(--text-3);}
+.shell-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+
+select, input[type="date"]{
+  height:34px; border:0.5px solid var(--border); border-radius:var(--r-ctrl); background:var(--surface);
+  color:var(--text); font-size:13px; padding:0 10px;
+}
+select:focus-visible, input[type="date"]:focus-visible{outline:2px solid var(--focus); outline-offset:1px;}
+input[type="date"]{width:140px;}
+.facet-label{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-3);}
+.date-range{display:flex; align-items:center; gap:8px;}
+
+.icon-btn{
+  display:flex; align-items:center; justify-content:center; width:34px; height:34px; flex-shrink:0;
+  border:0.5px solid var(--border); border-radius:var(--r-ctrl); background:var(--surface); color:var(--text-2);
+}
+.icon-btn:hover{color:var(--text); border-color:var(--border-strong);}
+.icon-btn:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+.icon-btn i{font-size:17px;}
+
+.shell-row2{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+.health-chip{
+  display:flex; align-items:center; gap:8px; padding:7px 12px; border:0.5px solid var(--border);
+  border-radius:999px; background:var(--surface-2); font-size:12px; color:var(--text-2);
+}
+.health-chip i{font-size:15px;}
+.health-chip .n{font-size:13px; font-weight:500; color:var(--text);}
+.health-chip.is-ok i{color:rgb(var(--tier-2));}
+.health-chip.is-warn i, .health-chip.is-warn .n{color:rgb(var(--st-amber));}
+.health-chip.is-risk i, .health-chip.is-risk .n{color:rgb(var(--st-red));}
+
+.page{max-width:1320px; margin:0 auto; padding:28px 28px 80px;}
+
+/* ---------- Card shell (shared) ---------- */
+.card{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--r-card); padding:20px;}
+
+/* ---------- Section labels ---------- */
+.section-label{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:28px 0 14px;}
+.section-label:first-child{margin-top:0;}
+.section-label h2{font-size:13px; font-weight:500; color:var(--text);}
+.section-label .range-note{font-size:12px; color:var(--text-3);}
+
+/* ---------- KPI cards (per object, worst-first) ---------- */
+.kpi-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); gap:16px;}
+.kpi-card{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--r-card); padding:18px;}
+.kpi-top{display:flex; align-items:center; gap:12px;}
+.kpi-name{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:var(--text); flex:1; min-width:0;}
+.kpi-name i{font-size:16px; color:var(--text-2); flex-shrink:0;}
+.ring-gauge{flex-shrink:0;}
+.ring-track{fill:none; stroke:var(--border-strong); stroke-width:5;}
+.ring-fill{fill:none; stroke-width:5; stroke-linecap:round; stroke:rgb(var(--sc)); transition:stroke-dasharray .2s ease;}
+.ring-label{font-size:12px; font-weight:500; fill:var(--text); font-family:'Inter',sans-serif;}
+.kpi-figures{display:flex; align-items:baseline; gap:6px; margin-top:14px;}
+.kpi-figures .used{font-size:16px; font-weight:500; color:var(--text);}
+.kpi-figures .of{font-size:12px; color:var(--text-3);}
+.kpi-figures .total{font-size:13px; color:var(--text-2);}
+.kpi-limit{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; padding-top:12px;
+  border-top:0.5px solid var(--border); font-size:12px; color:var(--text-3);
+}
+.limit-tag{
+  display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px;
+  background:var(--surface-2); color:var(--text-2); font-size:11px; font-weight:500; white-space:nowrap;
+}
+.limit-tag i{font-size:13px;}
+
+/* ---------- Tier pill / adhoc pill (shared) ---------- */
+.tier-pill{
+  display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px;
+  background:rgba(var(--tc),0.14); color:rgb(var(--tc)); font-size:11px; font-weight:500; white-space:nowrap;
+}
+.tier-pill .dot{width:6px; height:6px; border-radius:999px; background:rgb(var(--tc));}
+.adhoc-pill{
+  display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:999px;
+  background:rgba(var(--tc),0.14); color:rgb(var(--tc)); font-size:11px; font-weight:500; white-space:nowrap;
+}
+.adhoc-pill svg{width:10px; height:10px; display:block;}
+.adhoc-pill.lowered svg{transform:scaleY(-1);}
+.adhoc-dash{color:var(--text-3); font-size:12px;}
+
+/* ---------- Adhoc limits highlight ---------- */
+.adhoc-card .card-title{font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:7px; margin-bottom:4px;}
+.adhoc-card .card-title i{font-size:16px; color:var(--text-2);}
+.adhoc-card .card-sub{font-size:12px; color:var(--text-3); margin-bottom:14px;}
+.adhoc-list{display:flex; flex-direction:column; gap:10px;}
+.adhoc-item{
+  display:flex; align-items:center; gap:14px; padding:12px 14px; border:0.5px solid var(--border);
+  border-radius:var(--r-ctrl); background:var(--surface-2); flex-wrap:wrap;
+}
+.adhoc-item .ai-obj{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:var(--text); min-width:150px;}
+.adhoc-item .ai-obj i{font-size:16px; color:var(--text-2);}
+.adhoc-item .ai-move{display:flex; align-items:baseline; gap:6px; font-size:13px; color:var(--text-2);}
+.adhoc-item .ai-move .from{color:var(--text-3);}
+.adhoc-item .ai-move .arrow{color:var(--text-3);}
+.adhoc-item .ai-move .to{font-weight:500; color:var(--text);}
+.adhoc-item .ai-spacer{flex:1;}
+.adhoc-item .ai-used{font-size:12px; color:var(--text-3);}
+.adhoc-item .ai-used .m-val{font-weight:500; color:var(--text);}
+.adhoc-empty{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-2);}
+.adhoc-empty i{font-size:18px; color:rgb(var(--tier-2));}
+
+/* ---------- Usage-over-time charts ---------- */
+.chart-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:16px;}
+.chart-card{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--r-card); padding:18px;}
+.chart-card-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
+.chart-card-title{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:var(--text);}
+.chart-card-title i{font-size:16px; color:var(--text-2);}
+.chart-card-figure{font-size:12px; color:var(--text-3);}
+.chart-card-figure .val{font-weight:500;}
+.chart-canvas-wrap{position:relative; height:180px;}
+.chart-empty{display:flex; align-items:center; justify-content:center; height:180px; font-size:12px; color:var(--text-3);}
+
+/* ---------- Tooltip (shared) ---------- */
+#tooltip{
+  position:fixed; z-index:100; pointer-events:none; background:var(--text); color:var(--bg);
+  font-size:11px; font-weight:500; padding:6px 9px; border-radius:6px; max-width:280px;
+  line-height:1.35; opacity:0; transition:opacity .1s ease; transform:translate(-50%,-100%);
+}
+#tooltip.visible{opacity:1;}
+#tooltip::after{content:""; position:absolute; left:50%; bottom:-4px; width:8px; height:8px; margin-left:-4px; background:var(--text); transform:rotate(45deg);}
+
+@media (max-width:760px){
+  .page{padding:20px 16px 60px;}
+  .shell-inner{padding:14px 16px 12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================================
+     PERSISTENT SHELL — the signed-in user's own identity + a personal health
+     summary. Self-view: no org name, no cross-user search.
+     ============================================================================ -->
+<header class="shell">
+  <div class="shell-inner">
+    <div class="shell-row1">
+      <div class="user-id">
+        <span class="big-avatar" id="shellAvatar" aria-hidden="true"></span>
+        <div class="who">
+          <div class="user-name-row">
+            <span class="user-name" id="shellName"></span>
+            <span id="shellTier"></span>
+          </div>
+          <span class="user-sub">Your usage · Acme Health Systems</span>
+        </div>
+      </div>
+      <div class="shell-controls">
+        <div class="date-range" role="group" aria-label="Date range">
+          <label class="facet-label">From
+            <input type="date" id="dateFrom" aria-label="From date">
+          </label>
+          <label class="facet-label">To
+            <input type="date" id="dateTo" aria-label="To date">
+          </label>
+        </div>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle dark mode">
+          <i class="ti ti-moon" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <div class="shell-row2" id="healthCounters" aria-label="Your usage summary"></div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ============================== PER-OBJECT KPI CARDS ============================== -->
+  <div class="section-label">
+    <h2>Your usage by object</h2>
+    <span class="range-note">Against your effective limit</span>
+  </div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- ============================== ADHOC LIMITS HIGHLIGHT ============================== -->
+  <div class="section-label">
+    <h2>Adhoc limits</h2>
+    <span class="range-note">Admin adjustments to your standard license limits</span>
+  </div>
+  <div class="card adhoc-card" id="adhocCard"></div>
+
+  <!-- ============================== USAGE OVER TIME (INCREMENTAL) ============================== -->
+  <div class="section-label">
+    <h2>Usage over time</h2>
+    <span class="range-note" id="chartRangeNote"></span>
+  </div>
+  <div class="chart-grid" id="chartGrid"></div>
+
+</div>
+
+<div id="tooltip" role="tooltip"></div>
+
+<script>
+/* ============================================================================
+   SECTION: DATA MODEL — copied verbatim from usage-dashboard.html. A real API
+   returns this shape; the whole block is what a React port swaps for a fetch.
+   ============================================================================ */
+const TIERS = [
+  { id:'analyst_pro', name:'Analyst Pro', color:'tier-1', seatCap:22 },
+  { id:'creator',      name:'Creator',     color:'tier-2', seatCap:20 },
+  { id:'explorer',     name:'Explorer',    color:'tier-3', seatCap:14 },
+  { id:'viewer',       name:'Viewer',      color:'tier-4', seatCap:10 },
+];
+
+const OBJECTS = [
+  { id:'dashboards',  name:'Dashboards',  icon:'layout-dashboard', pool:400,    adhocAllowed:false,
+    allocations:{ analyst_pro:180, creator:140, explorer:50, viewer:20 } },
+  { id:'storyboards', name:'Storyboards', icon:'presentation-analytics', pool:500, adhocAllowed:false,
+    allocations:{ analyst_pro:220, creator:170, explorer:70, viewer:30 } },
+  { id:'datasets',    name:'Datasets',    icon:'database',   pool:1000,   adhocAllowed:true,
+    allocations:{ analyst_pro:450, creator:320, explorer:150, viewer:60 } },
+  { id:'sharing',     name:'Sharing',     icon:'share-2',    pool:5000,   adhocAllowed:false,
+    allocations:{ analyst_pro:2200, creator:1700, explorer:800, viewer:250 } },
+  { id:'queries',     name:'Queries',     icon:'terminal-2', pool:100000, adhocAllowed:true,
+    allocations:{ analyst_pro:48000, creator:32000, explorer:14000, viewer:4000 } },
+  { id:'ai_credits',  name:'AI credits',  icon:'sparkles',   pool:200000, adhocAllowed:true,
+    allocations:{ analyst_pro:100000, creator:65000, explorer:25000, viewer:8000 } },
+];
+
+const ROSTER = {
+  analyst_pro: ['Priya Nair','Marcus Webb','Elena Petrova','Sofia Alvarez','Daniel Kim','Rachel Osei','Hassan Ali','Wei Zhang','Isabella Rossi','Noah Bergström','Fatima Haidari','Lucas Dubois','Aiko Tanaka','Samuel Adeyemi','Clara Novak','Omar Farouk','Ingrid Larsen','Tariq Malik'],
+  creator: ['Jordan Lee','Amara Okafor','Tom Richter','Grace Chen','Diego Fernández','Chloe Martin','Ravi Shankar','Nadia Petrov','Ethan Brooks','Yuki Sato','Leila Haddad','Connor Murphy','Mia Johansson','Ben Okoye','Sara Lindqvist','Arjun Mehta'],
+  explorer: ["Liam O'Connor",'Nina Osei','Victor Hugo Santos','Mei Ling Tan','Oscar Berg','Ana Cristina Silva','Jonas Weber','Priyanka Rao','Felix Ngata','Hannah Kessler'],
+  viewer: ['Zoe Papadopoulos','Karim Benali','Emma Sundström','Jamal Carter','Lucia Moreno','Simon Vogt','Aisha Rahman','Peter Novotny'],
+};
+const slug = name => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const USERS = [];
+TIERS.forEach(t => (ROSTER[t.id] || []).forEach(name => USERS.push({ id: slug(name), name, tierId: t.id })));
+
+const ADHOC = {
+  'marcus-webb':   { datasets: 55 },
+  'chloe-martin':  { datasets: 6 },
+  'elena-petrova': { queries: 5200 },
+  'karim-benali':  { queries: 150 },
+  'ravi-shankar':  { ai_credits: 9000 },
+  'oscar-berg':    { ai_credits: 600 },
+};
+const ADHOC_USED = {
+  'marcus-webb:datasets': 51, 'chloe-martin:datasets': 5,
+  'elena-petrova:queries': 5100, 'karim-benali:queries': 40,
+  'ravi-shankar:ai_credits': 8700, 'oscar-berg:ai_credits': 200,
+};
+const PRESSURE = { dashboards:0.7, storyboards:0.6, datasets:0.95, sharing:1.25, queries:0.75, ai_credits:1.05 };
+
+/* ---------- Deterministic mock-data RNG (verbatim) ---------- */
+function hashSeed(str){ let h = 2166136261; for (let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rngFor = (...parts) => mulberry32(hashSeed(parts.join('|')));
+function usageFactor(rand){
+  const r = rand();
+  if (r < 0.05) return 0.95 + rand() * 0.40;
+  if (r < 0.28) return 0.55 + rand() * 0.27;
+  return 0.05 + rand() * 0.50;
+}
+
+/* ---------- USAGE: usage[userId][objectId] = { used, cap, share, isAdhoc } (verbatim) ---------- */
+function computeUsage(){
+  const usage = {};
+  USERS.forEach(u => { usage[u.id] = {}; });
+  OBJECTS.forEach(obj => {
+    const pressure = PRESSURE[obj.id] || 1;
+    TIERS.forEach(tier => {
+      const alloc = obj.allocations[tier.id] || 0;
+      const members = USERS.filter(u => u.tierId === tier.id);
+      const share = members.length ? alloc / members.length : 0;
+      members.forEach(u => {
+        const override = ADHOC[u.id] && ADHOC[u.id][obj.id];
+        const isAdhoc = override != null;
+        const cap = isAdhoc ? override : share;
+        const key = u.id + ':' + obj.id;
+        let used;
+        if (ADHOC_USED[key] != null){
+          used = ADHOC_USED[key];
+        } else {
+          const factor = usageFactor(rngFor(u.id, obj.id));
+          used = Math.max(0, Math.round(share * factor * pressure));
+          used = Math.min(used, Math.round(cap * 1.6));
+        }
+        usage[u.id][obj.id] = { used, cap, share, isAdhoc };
+      });
+    });
+  });
+  return usage;
+}
+const USAGE = computeUsage();
+
+/* ============================================================================
+   SECTION: CURRENT USER
+   Stand-in for the real auth/session lookup — change this one id to view a
+   different user's self-dashboard. 'elena-petrova' has an adhoc-raised queries
+   cap running near 98%, so both license and adhoc limits show off at once.
+   (Try 'wei-zhang' for a user on standard license limits only.)
+   ============================================================================ */
+const CURRENT_USER = 'elena-petrova';
+
+const me = USERS.find(u => u.id === CURRENT_USER) || USERS[0];
+const myTier = TIERS.find(t => t.id === me.tierId);
+
+/* ============================================================================
+   SECTION: SELECTORS / FORMAT HELPERS — verbatim, plus per-user shorthands.
+   ============================================================================ */
+const findObj = id => OBJECTS.find(o => o.id === id);
+const findTier = id => TIERS.find(t => t.id === id);
+const cell = (userId, objId) => USAGE[userId][objId];
+const cellPct = c => c.cap ? Math.min(999, c.used / c.cap * 100) : 0;
+
+const myCell = objId => cell(CURRENT_USER, objId);
+const myAdhoc = ADHOC[CURRENT_USER] || {};
+const myRemaining = c => Math.max(0, c.cap - c.used);
+
+function statusClass(p){
+  if (p >= 95) return 'st-red';
+  if (p >= 85) return 'st-amber';
+  if (p >= 60) return 'st-amber-tint';
+  return 'st-neutral';
+}
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const pct = n => Math.round(n);
+const initials = name => name.split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+
+function capDetail(c){
+  if (!c.isAdhoc) return `default even share (${fmt(c.share)})`;
+  const delta = c.cap - c.share;
+  return `default share ${fmt(c.share)}, ${delta >= 0 ? 'raised' : 'lowered'} by ${fmt(Math.abs(delta))}`;
+}
+function adhocIcon(lowered){
+  return `<svg class="m-adhoc${lowered ? ' lowered' : ''}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <line x1="8" y1="13" x2="8" y2="3"/><polyline points="4,6 8,3 12,6"/></svg>`;
+}
+
+/* ---------- Per-user daily usage series (usage over time). Built the same way
+   as the org dashboard's cumulative running total (non-decreasing increments,
+   anchored to today's real used value) — but charted here as the day-by-day
+   INCREMENT, not the cumulative line. For "how much did I create/consume
+   today" (new dashboards, new queries run), the incremental view surfaces
+   bursts of activity that a cumulative-vs-cap line flattens out. The running
+   total is still carried per point (as `cumulative`) for the tooltip. ---------- */
+const HISTORY_DAYS = 180;
+const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+const EARLIEST_DATE = new Date(TODAY); EARLIEST_DATE.setDate(EARLIEST_DATE.getDate() - (HISTORY_DAYS - 1));
+function buildUserSeries(objId){
+  const c = myCell(objId);
+  const finalUsed = c.used;
+  const r = rngFor('userseries', CURRENT_USER, objId);
+  const steps = HISTORY_DAYS - 1;
+
+  const startUsed = finalUsed * (0.35 + r() * 0.3);
+  const growth = Math.max(0, finalUsed - startUsed);
+  const weights = Array.from({ length: steps }, () => (r() < 0.12 ? 0 : r()));
+  const weightSum = weights.reduce((s, w) => s + w, 0) || 1;
+
+  const cumulative = [startUsed];
+  for (let i = 0; i < steps; i++) cumulative.push(cumulative[i] + growth * weights[i] / weightSum);
+  cumulative[steps] = finalUsed;
+
+  const out = [];
+  for (let i = 0; i <= steps; i++){
+    const d = new Date(EARLIEST_DATE); d.setDate(d.getDate() + i);
+    // Day 0's "startUsed" is pre-existing history, not new activity in-window —
+    // report it as zero incremental so the very first bar isn't a false spike.
+    const amount = i === 0 ? 0 : Math.max(0, cumulative[i] - cumulative[i - 1]);
+    out.push({ date: isoDate(d), amount, cumulative: cumulative[i] });
+  }
+  return out;
+}
+OBJECTS.forEach(obj => { obj.userSeries = buildUserSeries(obj.id); });
+function seriesInRange(obj, from, to){ return obj.userSeries.filter(pt => pt.date >= from && pt.date <= to); }
+
+/* ============================================================================
+   SECTION: STATE
+   ============================================================================ */
+const DEFAULT_FROM = new Date(TODAY); DEFAULT_FROM.setDate(DEFAULT_FROM.getDate() - 29);
+const state = {
+  dateFrom: isoDate(DEFAULT_FROM),
+  dateTo: isoDate(TODAY),
+};
+
+/* ============================================================================
+   SECTION: SHARED UI HELPERS (tooltip) — verbatim.
+   ============================================================================ */
+const tooltipEl = document.getElementById('tooltip');
+function bindTooltip(el, text){
+  el.setAttribute('data-tooltip', text);
+  el.addEventListener('mouseenter', showTooltip);
+  el.addEventListener('mousemove', showTooltip);
+  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('focus', showTooltip);
+  el.addEventListener('blur', hideTooltip);
+}
+function showTooltip(e){
+  const el = e.currentTarget; const text = el.getAttribute('data-tooltip'); if (!text) return;
+  tooltipEl.textContent = text;
+  const r = el.getBoundingClientRect();
+  tooltipEl.style.left = Math.min(window.innerWidth - 10, Math.max(10, r.left + r.width / 2)) + 'px';
+  tooltipEl.style.top = (r.top - 8) + 'px';
+  tooltipEl.classList.add('visible');
+}
+function hideTooltip(){ tooltipEl.classList.remove('visible'); }
+
+/* ============================================================================
+   SECTION: SHELL — identity + personal health counters.
+   ============================================================================ */
+function renderShellIdentity(){
+  const avatar = document.getElementById('shellAvatar');
+  avatar.style.setProperty('--tc', `var(--${myTier.color})`);
+  avatar.textContent = initials(me.name);
+  document.getElementById('shellName').textContent = me.name;
+  document.getElementById('shellTier').innerHTML =
+    `<span class="tier-pill" style="--tc:var(--${myTier.color})"><span class="dot"></span>${myTier.name}</span>`;
+}
+function renderHealthCounters(){
+  const nearCap = OBJECTS.filter(o => cellPct(myCell(o.id)) >= 85).length;
+  const adhocN = Object.keys(myAdhoc).length;
+  const wrap = document.getElementById('healthCounters');
+  wrap.innerHTML = `
+    <span class="health-chip ${nearCap > 0 ? 'is-risk' : 'is-ok'}"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span class="n">${nearCap}</span> object${nearCap === 1 ? '' : 's'} near cap</span>
+    <span class="health-chip ${adhocN > 0 ? 'is-warn' : 'is-ok'}"><i class="ti ti-adjustments" aria-hidden="true"></i><span class="n">${adhocN}</span> adhoc adjustment${adhocN === 1 ? '' : 's'}</span>
+    <span class="health-chip is-ok"><i class="ti ti-id-badge-2" aria-hidden="true"></i>License: <span class="n">${myTier.name}</span></span>
+  `;
+}
+
+/* ============================================================================
+   SECTION: KPI CARDS (per object, worst-first) — reuses ringGauge + statusClass.
+   ============================================================================ */
+function ringGauge(p, statusCls){
+  const r = 20, c = 2 * Math.PI * r;
+  const dash = Math.max(0, Math.min(100, p)) / 100 * c;
+  return `<svg class="ring-gauge" viewBox="0 0 48 48" width="48" height="48" role="img" aria-hidden="true">
+    <circle cx="24" cy="24" r="${r}" class="ring-track"/>
+    <circle cx="24" cy="24" r="${r}" class="ring-fill ${statusCls}" stroke-dasharray="${dash} ${c}" transform="rotate(-90 24 24)"/>
+    <text x="24" y="28" text-anchor="middle" class="ring-label">${pct(p)}%</text>
+  </svg>`;
+}
+function renderKpiCards(){
+  const cards = OBJECTS.map(obj => ({ obj, c: myCell(obj.id) }))
+    .map(x => ({ ...x, p: cellPct(x.c) }))
+    .sort((a, b) => b.p - a.p);
+  document.getElementById('kpiGrid').innerHTML = cards.map(({ obj, c, p }) => {
+    const st = statusClass(p);
+    let tag;
+    if (c.isAdhoc){
+      const lowered = c.cap < c.share;
+      tag = `<span class="adhoc-pill ${lowered ? 'lowered' : ''}" style="--tc:var(--${myTier.color})">${adhocIcon(lowered)}Adhoc · ${lowered ? 'lowered' : 'raised'}</span>`;
+    } else {
+      tag = `<span class="limit-tag"><i class="ti ti-license" aria-hidden="true"></i>License limit</span>`;
+    }
+    return `
+      <article class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-name"><i class="ti ti-${obj.icon}" aria-hidden="true"></i>${obj.name}</div>
+          ${ringGauge(p, st)}
+        </div>
+        <div class="kpi-figures">
+          <span class="used status-text ${st}">${fmt(c.used)}</span>
+          <span class="of">of</span><span class="total">${fmt(c.cap)}</span>
+        </div>
+        <div class="kpi-limit">
+          <span>${fmt(myRemaining(c))} remaining</span>
+          ${tag}
+        </div>
+      </article>`;
+  }).join('');
+}
+
+/* ============================================================================
+   SECTION: ADHOC LIMITS HIGHLIGHT — only this user's grants.
+   ============================================================================ */
+function renderAdhocCard(){
+  const wrap = document.getElementById('adhocCard');
+  const entries = Object.keys(myAdhoc);
+  if (!entries.length){
+    wrap.innerHTML = `
+      <div class="card-title"><i class="ti ti-adjustments" aria-hidden="true"></i>Adhoc limits</div>
+      <div class="adhoc-empty"><i class="ti ti-circle-check" aria-hidden="true"></i>No adhoc adjustments — you're on standard license limits for every object.</div>`;
+    return;
+  }
+  const items = entries.map(objId => {
+    const obj = findObj(objId);
+    const c = myCell(objId);
+    const p = cellPct(c);
+    const lowered = c.cap < c.share;
+    return `
+      <div class="adhoc-item" data-tooltip-src="${obj.name}: ${capDetail(c)}">
+        <span class="ai-obj"><i class="ti ti-${obj.icon}" aria-hidden="true"></i>${obj.name}</span>
+        <span class="ai-move">
+          <span class="from">${fmt(c.share)}</span>
+          <span class="arrow">→</span>
+          <span class="to">${fmt(c.cap)}</span>
+          <span class="adhoc-pill ${lowered ? 'lowered' : ''}" style="--tc:var(--${myTier.color})">${adhocIcon(lowered)}${lowered ? 'Lowered' : 'Raised'} by ${fmt(Math.abs(c.cap - c.share))}</span>
+        </span>
+        <span class="ai-spacer"></span>
+        <span class="ai-used status-text ${statusClass(p)}"><span class="m-val">${fmt(c.used)}</span> used · ${pct(p)}%</span>
+      </div>`;
+  }).join('');
+  wrap.innerHTML = `
+    <div class="card-title"><i class="ti ti-adjustments" aria-hidden="true"></i>Adhoc limits</div>
+    <div class="card-sub">These override your default license share. Everything else uses the standard ${myTier.name} limit.</div>
+    <div class="adhoc-list">${items}</div>`;
+  wrap.querySelectorAll('[data-tooltip-src]').forEach(el => bindTooltip(el, el.getAttribute('data-tooltip-src')));
+}
+
+/* ============================================================================
+   SECTION: USAGE-OVER-TIME CHARTS — incremental (per-day new usage) bars,
+   driven by the date range. Chart.js reads resolved colors (not CSS var
+   strings), so colors resolve from the current theme at render/theme-toggle
+   time.
+   ============================================================================ */
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function rgbVar(name){ return `rgb(${cssVar(name)})`; }
+function rgbaVar(name, alpha){ return `rgba(${cssVar(name)},${alpha})`; }
+function statusColorVarName(st){
+  if (st === 'st-red') return '--st-red';
+  if (st === 'st-amber') return '--st-amber';
+  if (st === 'st-amber-tint') return '--st-amber-tint';
+  return '--accent';
+}
+function formatShortDate(iso){
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+const charts = {};
+function renderCharts(){
+  document.getElementById('chartRangeNote').textContent =
+    `${formatShortDate(state.dateFrom)} – ${formatShortDate(state.dateTo)}`;
+  const wrap = document.getElementById('chartGrid');
+  const textColor = cssVar('--text-3');
+  const gridColor = cssVar('--border');
+
+  OBJECTS.forEach(obj => {
+    let card = document.getElementById('chart-card-' + obj.id);
+    if (!card){
+      card = document.createElement('article');
+      card.className = 'chart-card';
+      card.id = 'chart-card-' + obj.id;
+      wrap.appendChild(card);
+    }
+    const points = seriesInRange(obj, state.dateFrom, state.dateTo);
+    const c = myCell(obj.id);
+    const st = statusClass(cellPct(c));
+    const color = rgbVar(statusColorVarName(st));
+
+    card.innerHTML = `
+      <div class="chart-card-head">
+        <div class="chart-card-title"><i class="ti ti-${obj.icon}" aria-hidden="true"></i>${obj.name}</div>
+        <span class="chart-card-figure"><span class="val">${fmt(c.used)}</span> / ${fmt(c.cap)}</span>
+      </div>
+      <div class="chart-canvas-wrap">${points.length ? `<canvas id="chart-canvas-${obj.id}"></canvas>` : '<div class="chart-empty">No data in this range.</div>'}</div>`;
+
+    if (!points.length){
+      if (charts[obj.id]){ charts[obj.id].destroy(); delete charts[obj.id]; }
+      return;
+    }
+
+    const labels = points.map(p => formatShortDate(p.date));
+    const data = points.map(p => p.amount);
+    const running = points.map(p => p.cumulative);
+    const capVal = c.cap;
+
+    if (charts[obj.id]) charts[obj.id].destroy();
+    const ctx = document.getElementById('chart-canvas-' + obj.id).getContext('2d');
+    charts[obj.id] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{
+        data, running, backgroundColor: rgbaVar(statusColorVarName(st), 0.55),
+        hoverBackgroundColor: color, borderRadius: 2, barPercentage: 0.7, categoryPercentage: 0.9,
+      }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        interaction: { intersect: false, mode: 'index' },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 6, font: { size: 10, family: 'Inter' } } },
+          y: { min: 0, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10, family: 'Inter' }, precision: 0 } },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: cssVar('--text'), titleColor: cssVar('--bg'), bodyColor: cssVar('--bg'),
+            padding: 8, cornerRadius: 6, displayColors: false,
+            callbacks: { label: c2 => `+${fmt(c2.parsed.y)} that day · ${fmt(c2.dataset.running[c2.dataIndex])} of ${fmt(capVal)} running total` },
+          },
+        },
+      },
+    });
+  });
+}
+
+/* ============================================================================
+   SECTION: DATE RANGE + THEME TOGGLE (shell controls) — verbatim behavior.
+   ============================================================================ */
+const dateFromEl = document.getElementById('dateFrom');
+const dateToEl = document.getElementById('dateTo');
+function initDateInputs(){
+  const min = isoDate(EARLIEST_DATE), max = isoDate(TODAY);
+  [dateFromEl, dateToEl].forEach(el => { el.min = min; el.max = max; });
+  dateFromEl.value = state.dateFrom;
+  dateToEl.value = state.dateTo;
+}
+function onDateRangeChange(){
+  let from = dateFromEl.value, to = dateToEl.value;
+  if (from > to){ [from, to] = [to, from]; }
+  state.dateFrom = from; state.dateTo = to;
+  dateFromEl.value = from; dateToEl.value = to;
+  renderCharts();
+}
+dateFromEl.addEventListener('change', onDateRangeChange);
+dateToEl.addEventListener('change', onDateRangeChange);
+
+const themeToggle = document.getElementById('themeToggle');
+function applyThemeIcon(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const isDark = current === 'dark' || (!current && matchMedia('(prefers-color-scheme: dark)').matches);
+  themeToggle.querySelector('i').className = isDark ? 'ti ti-sun' : 'ti ti-moon';
+}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const isDark = current === 'dark' || (!current && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  applyThemeIcon();
+  renderCharts();
+});
+applyThemeIcon();
+
+/* ============================================================================
+   SECTION: INIT
+   ============================================================================ */
+renderShellIdentity();
+renderHealthCounters();
+renderKpiCards();
+renderAdhocCard();
+initDateInputs();
+renderCharts();
+</script>
+</body>
+</html>

@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumenore Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<style>
+  :root{
+    --bg:#F7F8FA; --surface:#FFFFFF; --border:#E4E7EC;
+    --text:#101828; --text-2:#475467; --muted:#98A2B3;
+    --accent:#3538CD; --accent-weak:#EEF0FF;
+    --success:#12B76A; --success-bg:#ECFDF3;
+    --warning:#F79009; --warning-bg:#FFFAEB;
+    --danger:#F04438; --danger-bg:#FEF3F2;
+    --r-ctrl:8px; --r-card:12px;
+    --sidebar-w:248px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text);
+    font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+  h1,h2,h3{margin:0;}
+  button{font-family:inherit; cursor:pointer;}
+  a{color:var(--accent); text-decoration:none;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    height:60px; background:var(--surface); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:20px; padding:0 24px; position:sticky; top:0; z-index:20;
+  }
+  .brand{display:flex; align-items:center; gap:10px; min-width:var(--sidebar-w); flex-shrink:0;}
+  .logo-mark{
+    width:30px; height:30px; border-radius:8px; background:var(--accent); color:#fff;
+    display:grid; place-items:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px;
+  }
+  .brand-name{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; letter-spacing:-.2px;}
+  .topsearch{flex:1; max-width:520px; position:relative;}
+  .topsearch i{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:18px;}
+  .topsearch input{
+    width:100%; height:38px; border:1px solid var(--border); border-radius:var(--r-ctrl);
+    padding:0 12px 0 38px; font-size:13.5px; background:var(--bg); color:var(--text);
+  }
+  .topsearch input::placeholder{color:var(--muted);}
+  .topsearch input:focus{outline:none; border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px var(--accent-weak);}
+  .topbar-right{margin-left:auto; display:flex; align-items:center; gap:8px;}
+  .icon-btn{width:34px; height:34px; border-radius:var(--r-ctrl); display:grid; place-items:center; color:var(--text-2); border:none; background:none; font-size:20px;}
+  .icon-btn:hover{background:var(--bg); color:var(--text);}
+  .btn-accent-outline{border-color:var(--accent); color:var(--accent);}
+  .btn-accent-outline:hover{background:var(--accent-weak);}
+  .topbar-sep{width:1px; height:24px; background:var(--border); margin:0 4px;}
+  .role-badge{
+    display:inline-flex; align-items:center; gap:6px; height:28px; padding:0 11px; border-radius:999px;
+    background:var(--accent-weak); color:var(--accent); font-weight:600; font-size:12.5px;
+  }
+  .avatar{
+    width:34px; height:34px; border-radius:999px; background:#101828; color:#fff;
+    display:grid; place-items:center; font-weight:600; font-size:13px;
+  }
+
+  /* ---------- Shell ---------- */
+  .shell{display:flex; align-items:stretch; min-height:calc(100vh - 60px);}
+  .ctx-wrap{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .ctx-shell{display:flex; align-items:stretch; flex:1; min-height:0;}
+
+  /* ---------- Global product rail ---------- */
+  .rail{
+    width:78px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border);
+    padding:12px 6px; display:flex; flex-direction:column; gap:4px;
+  }
+  .rail-item{
+    display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 4px; border-radius:var(--r-ctrl);
+    color:var(--text-2); text-align:center; border:none; background:none; font-size:10.5px; font-weight:500; line-height:1.15; width:100%;
+  }
+  .rail-item i{font-size:23px;}
+  .rail-item:hover{background:var(--bg); color:var(--text);}
+  .rail-item.active{background:var(--accent-weak); color:var(--accent); font-weight:600;}
+
+  .sidebar{
+    width:var(--sidebar-w); flex-shrink:0; background:var(--surface); border-right:1px solid var(--border);
+    padding:16px 12px; display:flex; flex-direction:column; gap:2px;
+  }
+  .nav-group-label{
+    font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); padding:14px 12px 6px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:11px; height:38px; padding:0 12px; border-radius:var(--r-ctrl);
+    color:var(--text-2); font-weight:500; font-size:13.5px; border:none; background:none; width:100%; text-align:left;
+  }
+  .nav-item i{font-size:19px;}
+  .nav-item:hover{background:var(--bg); color:var(--text);}
+  .nav-item.active{background:var(--accent-weak); color:var(--accent); font-weight:600;}
+  .nav-item.disabled{color:var(--muted); cursor:not-allowed; opacity:.65;}
+  .nav-item.disabled:hover{background:none; color:var(--muted);}
+
+  .nav-divider{height:1px; background:var(--border); margin:10px 12px;}
+
+  .nav-parent{position:relative;}
+  .nav-caret{margin-left:auto; font-size:16px; color:var(--muted); transition:transform .15s;}
+  .nav-expand.open .nav-caret{transform:rotate(90deg);}
+  .subnav{display:flex; flex-direction:column; gap:1px; padding:2px 0 4px;}
+  .nav-subitem{
+    display:flex; align-items:center; height:34px; padding:0 12px 0 41px; border-radius:var(--r-ctrl);
+    border:none; background:none; color:var(--text-2); font-size:13px; font-weight:500; width:100%; text-align:left;
+  }
+  .nav-subitem:hover{background:var(--bg); color:var(--text);}
+  .nav-subitem.active{background:var(--accent-weak); color:var(--accent); font-weight:600;}
+
+  .main{flex:1; min-width:0; padding:28px 32px 48px;}
+
+  /* ---------- Page header ---------- */
+  .page-head{display:flex; align-items:flex-start; gap:16px; margin-bottom:22px;}
+  .page-head .titles h1{font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:600; letter-spacing:-.4px;}
+  .page-head .titles p{margin:4px 0 0; color:var(--text-2); font-size:13.5px;}
+  .page-head .actions{margin-left:auto; display:flex; gap:10px; flex-shrink:0;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 14px; border-radius:var(--r-ctrl);
+    font-weight:600; font-size:13.5px; border:1px solid var(--border); background:var(--surface); color:var(--text);
+    transition:background .12s, border-color .12s;
+  }
+  .btn i{font-size:18px;}
+  .btn:hover{background:var(--bg);}
+  .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn-primary:hover{background:#2b2ea8;}
+  .btn-sm{height:32px; padding:0 12px; font-size:12.5px;}
+
+  /* ---------- Stat cards ---------- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;}
+  .stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); padding:16px 18px;}
+  .stat-card .label{color:var(--text-2); font-size:13px; font-weight:500;}
+  .stat-card .value{font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; letter-spacing:-1px; margin-top:6px;}
+  .stat-card .value.ok{color:var(--success);}
+  .stat-card .value.warn{color:var(--warning);}
+
+  /* ---------- Filter row ---------- */
+  .filters{display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+  .select{position:relative;}
+  .select i{position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:16px; pointer-events:none;}
+  select{
+    appearance:none; height:38px; padding:0 34px 0 12px; border:1px solid var(--border); border-radius:var(--r-ctrl);
+    background:var(--surface); color:var(--text); font-family:inherit; font-size:13.5px; font-weight:500; min-width:160px;
+  }
+  select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak);}
+  .search-inline{position:relative; flex:1; min-width:220px; max-width:340px;}
+  .search-inline i{position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:17px;}
+  .search-inline input{width:100%; height:38px; border:1px solid var(--border); border-radius:var(--r-ctrl); padding:0 12px 0 36px; font-size:13.5px; font-family:inherit;}
+  .search-inline input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak);}
+
+  /* ---------- Table ---------- */
+  .table-wrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden;}
+  table{width:100%; border-collapse:collapse;}
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--muted); padding:12px 18px; border-bottom:1px solid var(--border); background:#FCFCFD; white-space:nowrap;
+  }
+  tbody td{padding:14px 18px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:13.5px;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FCFCFD;}
+  .org-name{font-weight:600; color:var(--text);}
+  .org-id{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); margin-top:2px;}
+  .cell-muted{color:var(--text-2);}
+  .cell-dash{color:var(--muted);}
+  .num{font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Toggle switch ---------- */
+  .toggle{
+    position:relative; width:40px; height:22px; border-radius:999px; background:var(--muted); border:none;
+    transition:background .15s; flex-shrink:0;
+  }
+  .toggle::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:999px; background:#fff; transition:transform .15s;}
+  .toggle.on{background:var(--success);}
+  .toggle.on::after{transform:translateX(18px);}
+  .status-cell{display:flex; align-items:center; gap:10px;}
+  .status-text{font-size:12.5px; font-weight:500; color:var(--text-2); width:52px;}
+
+  /* ---------- Row action split button ---------- */
+  .action-group{display:inline-flex; align-items:stretch; border:1px solid var(--border); border-radius:var(--r-ctrl); position:relative; background:var(--surface);}
+  .action-group .ag-btn{border:none; background:none; font-family:inherit; font-weight:600; font-size:12.5px; color:var(--text); height:32px; padding:0 12px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;}
+  .action-group .ag-btn i{font-size:16px; color:var(--text-2);}
+  .action-group .ag-btn:first-child{border-radius:7px 0 0 7px;}
+  .action-group .ag-btn:hover{background:var(--bg);}
+  .action-group .ag-div{width:1px; background:var(--border);}
+  .action-group .ag-caret{padding:0 8px; border-radius:0 7px 7px 0;}
+  .row-menu{
+    position:fixed; display:none; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-ctrl); box-shadow:0 6px 20px rgba(16,24,40,.10); min-width:210px; padding:6px; z-index:50;
+  }
+  .action-group.open .row-menu{display:block;}
+  .row-menu button{
+    width:100%; border:none; background:none; font-family:inherit; font-weight:500; font-size:13px; color:var(--text);
+    height:36px; padding:0 10px; border-radius:6px; display:inline-flex; align-items:center; gap:10px; cursor:pointer; text-align:left;
+  }
+  .row-menu button i{font-size:18px; color:var(--text-2);}
+  .row-menu button:hover{background:var(--bg);}
+  .row-menu .rm-label{font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); padding:6px 10px 4px;}
+
+  /* ---------- Badges ---------- */
+  .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap;}
+  .badge .dot{width:6px; height:6px; border-radius:999px; background:currentColor;}
+  .badge.role{background:var(--bg); color:var(--text-2); border:1px solid var(--border);}
+  .badge.active{background:var(--success-bg); color:#087443;}
+  .badge.pending{background:var(--warning-bg); color:#B54708;}
+  .badge.deactivated{background:var(--danger-bg); color:#B42318;}
+
+  /* ---------- User cell ---------- */
+  .user-cell .u-name{font-weight:600;}
+  .user-cell .u-email{color:var(--text-2); font-size:12.5px; margin-top:1px;}
+
+  /* ---------- Context bar ---------- */
+  .ctx-bar{
+    display:flex; align-items:center; gap:14px; padding:14px 24px; background:var(--accent-weak);
+    border-bottom:1px solid #DADCF7;
+  }
+  .ctx-icon{width:40px; height:40px; border-radius:10px; background:#fff; border:1px solid #DADCF7; display:grid; place-items:center; color:var(--accent); font-size:22px;}
+  .ctx-text h2{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; letter-spacing:-.2px;}
+  .ctx-text p{margin:2px 0 0; color:var(--text-2); font-size:12.5px;}
+  .ctx-bar .btn{margin-left:auto; background:#fff;}
+
+  /* ---------- Inert placeholder ---------- */
+  .placeholder{
+    background:var(--surface); border:1px dashed var(--border); border-radius:var(--r-card);
+    padding:60px 24px; text-align:center; color:var(--muted);
+  }
+  .placeholder i{font-size:34px; display:block; margin-bottom:12px;}
+  .placeholder .ph-title{font-weight:600; color:var(--text-2); font-size:15px; margin-bottom:4px;}
+
+  /* ---------- Feature management ---------- */
+  .feat-panel .filters{margin-bottom:16px;}
+  .feat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    padding:16px 18px; margin-bottom:14px;
+  }
+  .feat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; align-items:start;}
+  .feat-grid .feat-card{margin-bottom:0;}
+  .feat-card-head{display:flex; align-items:center; gap:12px;}
+  .feat-name{font-weight:600; font-size:14px;}
+  .feat-card-head .toggle{margin-left:auto;}
+  .feat-desc{color:var(--text-2); font-size:12.5px; margin-top:4px;}
+  .feat-label{font-size:12px; font-weight:600; color:var(--text-2); display:block; margin-bottom:6px;}
+  .feat-input{
+    width:100%; height:38px; border:1px solid var(--border); border-radius:var(--r-ctrl);
+    padding:0 12px; font-size:13.5px; font-family:inherit; color:var(--text); background:var(--surface);
+  }
+  .feat-input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak);}
+  .feat-field{margin-top:12px;}
+  .feat-field-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .feat-field-row > .feat-field{flex:1; min-width:180px;}
+  .feat-suffix{display:flex; align-items:center; gap:8px;}
+  .feat-suffix .feat-input{max-width:140px;}
+  .feat-suffix span{font-size:12.5px; color:var(--muted);}
+
+  .feat-actions{display:flex; align-items:center; gap:10px; margin-top:14px;}
+  .feat-actions .btn{margin-left:auto;}
+  .save-state{font-size:12.5px; font-weight:600;}
+  .save-state.ok{color:var(--success);}
+  .save-state.err{color:var(--danger);}
+
+  /* Panel-level save — one per sub-tab, inline with that tab's search */
+  /* keep the save on the search row — the search shrinks instead of the bar wrapping */
+  .feat-panel .filters, #tab-limits .filters{flex-wrap:nowrap; align-items:center;}
+  .panel-save{display:flex; align-items:center; gap:12px; margin-left:auto; flex-shrink:0;}
+  .panel-save .save-state{white-space:nowrap;}
+
+  .feat-expand{
+    border:none; background:none; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--accent);
+    padding:0; margin-top:12px; display:inline-flex; align-items:center; gap:5px;
+  }
+  .feat-expand i{font-size:16px; transition:transform .15s;}
+  .feat-expand.open i{transform:rotate(90deg);}
+  .feat-sub{border-top:1px solid var(--border); margin-top:12px; padding-top:14px;}
+  .feat-sub-toggle{display:flex; align-items:center; gap:12px;}
+  .feat-sub-toggle .feat-label{margin:0;}
+  .feat-sub-toggle .toggle{margin-left:auto;}
+
+  .feat-empty{color:var(--muted); font-size:13.5px; padding:22px 2px;}
+
+  .feat-readonly{display:grid; grid-template-columns:1fr auto; gap:10px 24px; margin-top:14px; max-width:420px;}
+  .feat-readonly dt{color:var(--muted); font-size:13px;}
+  .feat-readonly dd{margin:0; color:var(--muted); text-align:right; font-size:13px;}
+  .feat-note{color:var(--text-2); font-size:13.5px;}
+
+  .feat-muted .feat-name{color:var(--text-2);}
+  .logo-row{display:flex; align-items:center; gap:12px; margin-top:12px;}
+  .logo-thumb{
+    width:44px; height:44px; border-radius:var(--r-ctrl); border:1px solid var(--border); background:var(--bg);
+    display:grid; place-items:center; color:var(--muted); font-size:22px; flex-shrink:0;
+  }
+  .logo-file{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--text-2); word-break:break-all;}
+
+  /* ---------- Engineering-only / disabled feature row ---------- */
+  .feat-card.feat-disabled{background:#FCFCFD; border-style:dashed;}
+  .feat-card.feat-disabled .feat-name{color:var(--text-2);}
+  .feat-card.feat-disabled .feat-desc{color:var(--muted);}
+  .badge.eng{background:var(--warning-bg); color:#B54708;}
+  .badge.orgoff{background:var(--bg); color:var(--text-2); border:1px solid var(--border);}
+  .badge.dep{background:var(--danger-bg); color:#B42318;}
+
+  /* Read-only data chip on a feature card */
+  .feat-chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+  .feat-chip{font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); color:var(--text-2); padding:3px 9px; border-radius:6px;}
+  .feat-readonly-note{font-size:12px; color:var(--muted); margin-top:8px; display:flex; align-items:center; gap:6px;}
+  .feat-readonly-note i{font-size:15px;}
+
+  /* Sub-toggle rows inside a grouped / decomposed card */
+  .feat-subrow{display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--border);}
+  .feat-subrow:first-of-type{border-top:none;}
+  .feat-subrow .sr-label{font-size:13px; font-weight:500;}
+  .feat-subrow .sr-key{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); margin-left:2px;}
+  .feat-subrow .toggle{margin-left:auto;}
+  .feat-group-body{margin-top:10px;}
+  .feat-key{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); margin-left:8px; font-weight:500;}
+  .feat-eng-badge{margin-left:auto;}
+
+  .cat-count{font-size:11px; font-weight:600; color:var(--muted); margin-left:6px;}
+
+  /* ---------- Feature accordion + global search ---------- */
+  .feat-searchbar{
+    position:sticky; top:60px; z-index:15; background:var(--bg);
+    display:flex; align-items:center; gap:12px; padding:12px 0 14px; margin-bottom:6px;
+    border-bottom:1px solid var(--border);
+  }
+  .feat-searchbar .search-inline{flex:1; min-width:220px; max-width:none;}
+
+  .acc{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); margin-bottom:12px; overflow:hidden;}
+  .acc-head{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    border:none; background:none; font-family:inherit; padding:15px 18px; color:var(--text);
+  }
+  .acc-head:hover{background:#FCFCFD;}
+  .acc-head .acc-icon{font-size:20px; color:var(--accent); flex-shrink:0;}
+  .acc-head .acc-title{font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600;}
+  .acc-head .acc-count{
+    margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    color:var(--text-2); background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:2px 9px;
+  }
+  .acc-head .acc-chev{font-size:20px; color:var(--muted); transition:transform .18s; flex-shrink:0;}
+  .acc.open .acc-head .acc-chev{transform:rotate(180deg);}
+  .acc-body{padding:4px 18px 18px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:12px;}
+  .acc-body .feat-card{margin-bottom:0;}
+
+  /* Engineering-only section — visually deprioritized */
+  .acc.acc-muted .acc-head .acc-icon{color:var(--muted);}
+  .acc.acc-muted .acc-head .acc-title{color:var(--text-2);}
+  .acc.acc-muted{background:#FCFCFD;}
+
+  /* Sub-label chip on a card (e.g. "User list actions") */
+  .feat-sublabel{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--text-2);
+    background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:2px 9px; margin-left:auto;
+  }
+  .feat-sublabel i{font-size:13px;}
+
+  /* Search-match highlight flash */
+  @keyframes featHit{0%{background:var(--warning-bg); border-color:var(--warning);} 100%{background:var(--surface); border-color:var(--border);}}
+  .feat-card.feat-hit{animation:featHit 1.6s ease-out;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(16,24,40,.45); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    box-shadow:0 20px 48px rgba(16,24,40,.24); width:100%; max-width:460px; overflow:hidden;
+  }
+  .modal-head{display:flex; align-items:flex-start; gap:12px; padding:20px 20px 0;}
+  .modal-icon{width:40px; height:40px; border-radius:10px; background:var(--warning-bg); color:var(--warning); display:grid; place-items:center; font-size:22px; flex-shrink:0;}
+  .modal-head h3{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600;}
+  .modal-body{padding:12px 20px 4px; color:var(--text-2); font-size:13.5px; line-height:1.5;}
+  .modal-body strong{color:var(--text);}
+  .modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:16px 20px 20px;}
+
+  /* ---------- Role feature assignment ---------- */
+  .role-cat{margin-bottom:22px;}
+  .role-cat-title{font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .role-cat-title i{font-size:18px; color:var(--accent);}
+  .role-flag-row{
+    display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--surface);
+    border:1px solid var(--border); border-radius:var(--r-ctrl); margin-bottom:8px;
+  }
+  .role-flag-row.disabled{background:#FCFCFD;}
+  .role-flag-main{min-width:0;}
+  .role-flag-name{font-weight:600; font-size:13.5px;}
+  .role-flag-desc{color:var(--text-2); font-size:12px; margin-top:1px;}
+  .role-flag-row .right{margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .info-note{
+    display:flex; gap:10px; align-items:flex-start; background:var(--accent-weak); border:1px solid #DADCF7;
+    border-radius:var(--r-ctrl); padding:12px 14px; color:var(--text-2); font-size:12.5px; margin-bottom:20px;
+  }
+  .info-note i{color:var(--accent); font-size:18px; flex-shrink:0;}
+
+  /* Section wrapper (billing / role) */
+  .section-block{margin-bottom:28px;}
+  .section-block > .sb-head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
+  .section-block > .sb-head h2{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600;}
+  .section-block > .sb-head .sb-sub{color:var(--text-2); font-size:12.5px;}
+  .sb-placeholder{border:1px dashed var(--border); border-radius:var(--r-card); padding:22px; color:var(--muted); font-size:13px; background:#FCFCFD;}
+
+  /* ---------- Role management: list screen + detail screen ---------- */
+  .role-name-cell{font-weight:600;}
+  .role-desc-cell{color:var(--text-2); max-width:440px;}
+  .role-users-cell{color:var(--text-2);}
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; background:none; border:none; padding:0;
+    color:var(--text-2); font-size:13px; font-weight:600; margin-bottom:18px;
+  }
+  .back-link:hover{color:var(--text);}
+  .back-link i{font-size:16px;}
+
+  .role-detail-head h2{font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600; display:inline;}
+  .role-detail-count{margin-left:10px; color:var(--text-2); font-size:12.5px; font-weight:500;}
+  .role-detail-desc{color:var(--text-2); font-size:13px; margin-top:6px;}
+
+  .role-tabs{display:flex; gap:22px; border-bottom:1px solid var(--border); margin:18px 0 20px;}
+  .role-tab{background:none; border:none; padding:0 0 12px; font-size:13.5px; font-weight:600; color:var(--text-2); border-bottom:2px solid transparent; margin-bottom:-1px;}
+  .role-tab:hover{color:var(--text);}
+  .role-tab.active{color:var(--accent); border-bottom-color:var(--accent);}
+
+  .avatar{width:34px; height:34px; border-radius:50%; background:var(--accent-weak); color:var(--accent); display:grid; place-items:center; font-weight:600; font-size:12.5px; flex-shrink:0;}
+  .user-row{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--border);}
+  .user-row:last-child{border-bottom:none;}
+  .user-row-info{min-width:0;}
+  .user-row-remove{margin-left:auto; color:var(--muted); flex-shrink:0;}
+  .user-row-remove:hover{color:var(--danger); background:var(--danger-bg);}
+  .role-assigned-users{margin-top:16px;}
+  .user-search-list{border:1px solid var(--border); border-radius:var(--r-ctrl); margin-top:8px; overflow:hidden;}
+  .user-search-row{display:flex; align-items:center; gap:12px; padding:10px 12px; border-bottom:1px solid var(--border);}
+  .user-search-row:last-child{border-bottom:none;}
+  .user-search-row .btn{margin-left:auto; flex-shrink:0;}
+  .user-search-empty{color:var(--muted); font-size:12.5px; margin-top:8px;}
+
+  .perm-matrix-table th:not(:first-child), .perm-matrix-table td:not(:first-child){text-align:center;}
+  .perm-matrix-table input[type="checkbox"]{width:16px; height:16px; accent-color:var(--accent); cursor:pointer;}
+  .perm-matrix-footnote{display:flex; gap:8px; align-items:flex-start; color:var(--muted); font-size:12px; margin-top:12px;}
+  .perm-matrix-footnote i{font-size:15px; flex-shrink:0; margin-top:1px;}
+
+  .role-flag-row .role-flag-checklabel{display:flex; align-items:center; gap:10px; min-width:0; cursor:pointer;}
+  .role-flag-row .role-flag-checklabel input[type="checkbox"]{width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0;}
+  .role-flag-row.disabled .role-flag-checklabel{cursor:not-allowed;}
+  .role-flag-row.disabled .role-flag-name{color:var(--muted);}
+  .role-flag-row .badge.orgoff{margin-left:auto; flex-shrink:0;}
+
+  .limit-row{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border:1px solid var(--border); border-radius:var(--r-ctrl); background:var(--surface); margin-bottom:10px;}
+  .limit-row-main .feat-label{display:block; font-weight:600; font-size:13.5px; color:var(--text); margin-bottom:2px;}
+  .limit-pool-note{color:var(--text-2); font-size:12px;}
+  .limit-input{width:140px; text-align:right;}
+
+  /* ---------- New organization wizard ---------- */
+  .wiz-steps{
+    display:flex; align-items:center; gap:8px; margin-bottom:24px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); padding:16px 18px;
+  }
+  .wiz-step{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .wiz-step .wiz-num{
+    width:28px; height:28px; border-radius:999px; display:grid; place-items:center; font-weight:600; font-size:13px;
+    background:var(--bg); color:var(--text-2); border:1px solid var(--border); flex-shrink:0;
+  }
+  .wiz-step .wiz-num i{font-size:16px;}
+  .wiz-step.active .wiz-num{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .wiz-step.done .wiz-num{background:var(--success); color:#fff; border-color:var(--success);}
+  .wiz-step .wiz-step-label{font-size:12.5px; font-weight:600; color:var(--text-2); white-space:nowrap;}
+  .wiz-step.active .wiz-step-label{color:var(--text);}
+  .wiz-step-line{height:1px; background:var(--border); flex:1; min-width:16px;}
+  .wiz-foot{display:flex; gap:10px; justify-content:space-between; margin-top:24px;}
+  .wiz-foot .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .wiz-field{margin-bottom:18px; max-width:520px;}
+  .wiz-field .feat-label{margin-bottom:6px;}
+  .wiz-req{color:var(--danger);}
+  .sublic-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); padding:16px 18px; margin-bottom:14px;}
+  .sublic-head{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .sublic-head .feat-input{max-width:340px;}
+  .sublic-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
+  .sublic-grid .feat-field{margin:0;}
+  .wiz-inline-msg{display:flex; gap:8px; align-items:center; color:var(--danger); font-size:12.5px; font-weight:600; margin-top:12px;}
+  .wiz-inline-msg i{font-size:16px;}
+  .wiz-review-block{margin-bottom:22px;}
+  .wiz-review-block h3{font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; margin-bottom:10px;}
+  .wiz-review-list{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden;}
+  .wiz-review-row{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .wiz-review-row:last-child{border-bottom:none;}
+  .wiz-review-row .rv-label{color:var(--text-2);}
+  .wiz-review-row .rv-val{margin-left:auto; font-weight:600;}
+  .wiz-review-row .rv-val.mono{font-family:'IBM Plex Mono',monospace; font-weight:500;}
+
+  [hidden]{display:none !important;}
+
+  @media (max-width:1100px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    :root{--sidebar-w:216px;}
+    .main{padding:24px 20px 40px;}
+    .feat-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN 1: ORGANIZATIONS ============ -->
+<div id="screen-orgs">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-mark">L</div>
+      <div class="brand-name">Lumenore</div>
+    </div>
+    <div class="topsearch">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Search organizations, users, dashboards, schemas...">
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-sm btn-accent-outline"><i class="ti ti-rocket"></i> Plan details</button>
+      <button class="icon-btn" title="Help"><i class="ti ti-help-circle"></i></button>
+      <button class="icon-btn" title="What's new"><i class="ti ti-device-desktop"></i></button>
+      <button class="icon-btn" title="Notifications"><i class="ti ti-bell"></i></button>
+      <div class="topbar-sep"></div>
+      <span class="role-badge"><i class="ti ti-shield-lock" style="font-size:15px"></i> Netlink master</span>
+      <div class="avatar">RV</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <nav class="rail">
+      <button class="rail-item"><i class="ti ti-home"></i> Home</button>
+      <button class="rail-item"><i class="ti ti-database"></i> Data</button>
+      <button class="rail-item"><i class="ti ti-layout-grid"></i> Dashboard</button>
+      <button class="rail-item"><i class="ti ti-sparkles"></i> Ask Me</button>
+      <button class="rail-item"><i class="ti ti-bulb"></i> Do You Know</button>
+      <button class="rail-item"><i class="ti ti-magnet"></i> Data Magnet</button>
+      <button class="rail-item"><i class="ti ti-settings"></i> Manage</button>
+    </nav>
+    <nav class="sidebar">
+      <button class="nav-item active"><i class="ti ti-building"></i> Organizations</button>
+
+      <div class="nav-group-label">Workspace</div>
+      <div class="nav-expand">
+        <button class="nav-item nav-parent" onclick="toggleSubnav(this)">
+          <i class="ti ti-layout-dashboard"></i> Dashboard
+          <i class="ti ti-chevron-right nav-caret"></i>
+        </button>
+        <div class="subnav" hidden>
+          <button class="nav-subitem">Dashboards</button>
+          <button class="nav-subitem">Storyboards</button>
+        </div>
+      </div>
+      <div class="nav-expand">
+        <button class="nav-item nav-parent" onclick="toggleSubnav(this)">
+          <i class="ti ti-database"></i> Data
+          <i class="ti ti-chevron-right nav-caret"></i>
+        </button>
+        <div class="subnav" hidden>
+          <button class="nav-subitem">Datasets</button>
+          <button class="nav-subitem">Schema</button>
+        </div>
+      </div>
+      <button class="nav-item"><i class="ti ti-users"></i> User management</button>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div class="titles">
+          <h1>Organizations</h1>
+          <p>Global view, all organizations</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="openNewOrgWizard()"><i class="ti ti-plus"></i> New organization</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><div class="label">Organizations</div><div class="value">18</div></div>
+        <div class="stat-card"><div class="label">Active</div><div class="value ok">15</div></div>
+        <div class="stat-card"><div class="label">Total users</div><div class="value">2,340</div></div>
+        <div class="stat-card"><div class="label">On trial</div><div class="value warn">3</div></div>
+      </div>
+
+      <div class="filters">
+        <div class="select"><select><option>All statuses</option><option>Active</option><option>Inactive</option></select><i class="ti ti-chevron-down"></i></div>
+        <div class="select"><select><option>All industries</option><option>Healthcare</option><option>Retail</option><option>Finance</option><option>Manufacturing</option><option>Technology</option></select><i class="ti ti-chevron-down"></i></div>
+        <div class="select"><select><option>All plan tiers</option><option>Enterprise</option><option>Business</option><option>Trial</option></select><i class="ti ti-chevron-down"></i></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Organization name</th>
+              <th>Parent organization</th>
+              <th>Status</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orgTableBody"><!-- rows injected --></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ SCREEN 2: ORG CONTEXT ============ -->
+<div id="screen-context" hidden>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-mark">L</div>
+      <div class="brand-name">Lumenore</div>
+    </div>
+    <div class="topsearch">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Search organizations, users, dashboards, schemas...">
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-sm btn-accent-outline"><i class="ti ti-rocket"></i> Plan details</button>
+      <button class="icon-btn" title="Help"><i class="ti ti-help-circle"></i></button>
+      <button class="icon-btn" title="What's new"><i class="ti ti-device-desktop"></i></button>
+      <button class="icon-btn" title="Notifications"><i class="ti ti-bell"></i></button>
+      <div class="topbar-sep"></div>
+      <span class="role-badge"><i class="ti ti-shield-lock" style="font-size:15px"></i> Netlink master</span>
+      <div class="avatar">RV</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <nav class="rail">
+      <button class="rail-item"><i class="ti ti-home"></i> Home</button>
+      <button class="rail-item"><i class="ti ti-database"></i> Data</button>
+      <button class="rail-item"><i class="ti ti-layout-grid"></i> Dashboard</button>
+      <button class="rail-item"><i class="ti ti-sparkles"></i> Ask Me</button>
+      <button class="rail-item"><i class="ti ti-bulb"></i> Do You Know</button>
+      <button class="rail-item"><i class="ti ti-magnet"></i> Data Magnet</button>
+      <button class="rail-item"><i class="ti ti-settings"></i> Manage</button>
+    </nav>
+
+    <div class="ctx-wrap">
+      <div class="ctx-bar">
+        <div class="ctx-icon"><i class="ti ti-building"></i></div>
+        <div class="ctx-text">
+          <h2 id="ctxName">Managing organization</h2>
+          <p id="ctxMeta">Industry · Plan</p>
+        </div>
+        <button class="btn" onclick="showOrgs()"><i class="ti ti-arrow-left"></i> All organizations</button>
+      </div>
+
+      <div class="ctx-shell">
+        <nav class="sidebar">
+          <button class="nav-item active" data-tab="users" onclick="selectTab(this)"><i class="ti ti-users"></i> User management</button>
+          <button class="nav-item" data-tab="roles" onclick="selectTab(this)"><i class="ti ti-shield"></i> Role management</button>
+          <button class="nav-item" data-tab="features" onclick="selectTab(this)"><i class="ti ti-toggle-left"></i> Feature management</button>
+          <button class="nav-item" data-tab="limits" onclick="selectTab(this)"><i class="ti ti-gauge"></i> Limits and AI credits</button>
+          <button class="nav-item" data-tab="billing" onclick="selectTab(this)"><i class="ti ti-credit-card"></i> Billing &amp; licensing</button>
+
+          <div class="nav-divider"></div>
+
+          <button class="nav-item" data-tab="dashboards" onclick="selectTab(this)"><i class="ti ti-layout-dashboard"></i> Dashboards</button>
+          <button class="nav-item" data-tab="storyboards" onclick="selectTab(this)"><i class="ti ti-presentation"></i> Storyboards</button>
+          <button class="nav-item" data-tab="datasets" onclick="selectTab(this)"><i class="ti ti-table"></i> Datasets</button>
+          <button class="nav-item" data-tab="schema" onclick="selectTab(this)"><i class="ti ti-schema"></i> Schema</button>
+        </nav>
+
+    <main class="main">
+      <!-- User management tab -->
+      <div id="tab-users">
+        <div class="page-head">
+          <div class="titles">
+            <h1>Users</h1>
+            <p id="usersSub">Manage users in this organization</p>
+          </div>
+          <div class="actions">
+            <button class="btn"><i class="ti ti-upload"></i> Bulk upload</button>
+            <button class="btn btn-primary"><i class="ti ti-user-plus"></i> Invite user</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card"><div class="label">Total users</div><div class="value">42</div></div>
+          <div class="stat-card"><div class="label">Active</div><div class="value ok">36</div></div>
+          <div class="stat-card"><div class="label">Pending invites</div><div class="value warn">4</div></div>
+          <div class="stat-card"><div class="label">Deactivated</div><div class="value">2</div></div>
+        </div>
+
+        <div class="filters">
+          <div class="search-inline"><i class="ti ti-search"></i><input type="text" placeholder="Search users in this org..."></div>
+          <div class="select"><select><option>All roles</option><option>Org admin</option><option>Analyst</option><option>Viewer</option></select><i class="ti ti-chevron-down"></i></div>
+          <div class="select"><select><option>All statuses</option><option>Active</option><option>Pending invite</option><option>Deactivated</option></select><i class="ti ti-chevron-down"></i></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last active</th>
+                <th>Login activity</th>
+                <th style="text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="user-cell"><div class="u-name">Priya Nair</div><div class="u-email">priya.nair@acmehealth.com</div></div></td>
+                <td><span class="badge role">Org admin</span></td>
+                <td><span class="badge active"><span class="dot"></span>Active</span></td>
+                <td class="cell-muted">2 hours ago</td>
+                <td class="cell-muted num">128 logins</td>
+                <td style="text-align:right"><button class="btn btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><div class="user-cell"><div class="u-name">Marcus Lee</div><div class="u-email">marcus.lee@acmehealth.com</div></div></td>
+                <td><span class="badge role">Analyst</span></td>
+                <td><span class="badge active"><span class="dot"></span>Active</span></td>
+                <td class="cell-muted">Yesterday</td>
+                <td class="cell-muted num">54 logins</td>
+                <td style="text-align:right"><button class="btn btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><div class="user-cell"><div class="u-name">Sofia Alvarez</div><div class="u-email">sofia.alvarez@acmehealth.com</div></div></td>
+                <td><span class="badge role">Viewer</span></td>
+                <td><span class="badge pending"><span class="dot"></span>Pending invite</span></td>
+                <td class="cell-dash">—</td>
+                <td class="cell-dash">—</td>
+                <td style="text-align:right"><button class="btn btn-sm">Resend</button></td>
+              </tr>
+              <tr>
+                <td><div class="user-cell"><div class="u-name">David Osei</div><div class="u-email">david.osei@acmehealth.com</div></div></td>
+                <td><span class="badge role">Analyst</span></td>
+                <td><span class="badge deactivated"><span class="dot"></span>Deactivated</span></td>
+                <td class="cell-muted">Mar 12, 2026</td>
+                <td class="cell-muted num">312 logins</td>
+                <td style="text-align:right"><button class="btn btn-sm">Reactivate</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Feature management tab -->
+      <div id="tab-features" hidden>
+        <div class="page-head">
+          <div class="titles">
+            <h1>Feature management</h1>
+            <p>Org-level feature flags, grouped by category. Scoped to this organization.</p>
+          </div>
+        </div>
+
+        <div class="feat-searchbar">
+          <div class="search-inline"><i class="ti ti-search"></i><input type="text" id="featureSearch" placeholder="Search all feature flags..." oninput="featureSearchAll(this)"></div>
+          <div class="panel-save">
+            <span class="save-state" hidden></span>
+            <button class="btn btn-primary" onclick="savePanel(this)">Save changes</button>
+          </div>
+        </div>
+
+        <div id="featureAccordion"><!-- category accordion sections injected --></div>
+        <div class="feat-empty" id="featureEmpty" hidden>No matching settings.</div>
+      </div>
+
+      <!-- Billing & licensing tab -->
+      <div id="tab-billing" hidden>
+        <div class="page-head">
+          <div class="titles">
+            <h1>Billing &amp; licensing</h1>
+            <p>Plan, licensing and trial settings for this organization.</p>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="sb-head">
+            <h2>Flag settings</h2>
+            <span class="sb-sub">Licensing-related feature flags</span>
+          </div>
+          <div id="billingFlags"><!-- injected --></div>
+        </div>
+
+        <div class="section-block">
+          <div class="sb-head">
+            <h2>Plan details</h2>
+            <span class="sb-sub">Current plan, seats and renewal</span>
+          </div>
+          <div class="sb-placeholder"><i class="ti ti-info-circle"></i> Plan details, invoices, renewal tracking and upgrade / downgrade requests are part of the full Billing &amp; Licensing module (per PRD) and will be built out here.</div>
+        </div>
+      </div>
+
+      <!-- Role management tab -->
+      <div id="tab-roles" hidden>
+
+        <!-- ============ Screen A: role list ============ -->
+        <div id="roleListScreen">
+          <div class="page-head">
+            <div class="titles">
+              <h1>Role management</h1>
+              <p>Define roles and the features &amp; permissions each role grants.</p>
+            </div>
+            <div class="actions">
+              <!-- No create-role modal/drawer exists elsewhere in this prototype to follow (Invite user,
+                   Bulk upload etc. are also unwired) -- button is present per spec but intentionally not
+                   wired to a flow. Surfaced as an open question: modal vs. new route once a pattern exists. -->
+              <button class="btn btn-primary"><i class="ti ti-plus"></i> Create role</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Role</th><th>Description</th><th>Users</th><th></th></tr>
+              </thead>
+              <tbody id="roleListBody"><!-- injected --></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============ Screen B: role detail ============ -->
+        <div id="roleDetailScreen" hidden>
+          <button class="back-link" onclick="backToRoleList()"><i class="ti ti-arrow-left"></i> Back to roles</button>
+
+          <div class="role-detail-head">
+            <h2 id="roleDetailName">Admin</h2><span class="role-detail-count" id="roleDetailCount">0 users assigned</span>
+            <p class="role-detail-desc" id="roleDetailDesc"></p>
+          </div>
+
+          <div class="role-tabs">
+            <button class="role-tab active" data-rtab="users" onclick="selectRoleTab(this)">Assigned users</button>
+            <button class="role-tab" data-rtab="matrix" onclick="selectRoleTab(this)">Permission matrix</button>
+            <button class="role-tab" data-rtab="features" onclick="selectRoleTab(this)">Feature access</button>
+            <button class="role-tab" data-rtab="limits" onclick="selectRoleTab(this)">Default limits</button>
+          </div>
+
+          <!-- Tab 1: Assigned users -->
+          <div class="role-tabpanel" id="rtab-users">
+            <div class="search-inline" style="max-width:420px">
+              <i class="ti ti-search"></i>
+              <input type="text" id="roleUserSearch" placeholder="Search existing users to add" oninput="searchRoleUsers(this)">
+            </div>
+            <div id="roleUserSearchResults"></div>
+            <div class="role-assigned-users" id="roleAssignedUsers"><!-- injected --></div>
+          </div>
+
+          <!-- Tab 2: Permission matrix -->
+          <div class="role-tabpanel" id="rtab-matrix" hidden>
+            <div class="table-wrap">
+              <table class="perm-matrix-table">
+                <thead>
+                  <tr><th>Module</th><th>View</th><th>Create</th><th>Edit</th><th>Delete</th></tr>
+                </thead>
+                <tbody id="permMatrixBody"><!-- injected --></tbody>
+              </table>
+            </div>
+            <div class="perm-matrix-footnote"><i class="ti ti-info-circle"></i> Module-level object permissions — a separate system from feature flags. Changes here do not affect Feature access below, and vice versa.</div>
+          </div>
+
+          <!-- Tab 3: Feature access -->
+          <div class="role-tabpanel" id="rtab-features" hidden>
+            <div class="info-note">
+              <i class="ti ti-info-circle"></i>
+              <span>A user's capabilities come entirely from the role they're tagged to — there are no per-user overrides. A role can only grant features the organization has enabled in Feature management.</span>
+            </div>
+            <div class="feat-searchbar">
+              <div class="search-inline" style="max-width:none">
+                <i class="ti ti-search"></i>
+                <input type="text" id="roleFeatureSearch" placeholder="Search all feature flags..." oninput="roleFeatureSearchAll(this)">
+              </div>
+            </div>
+            <div id="roleFeatureAccordion"><!-- injected --></div>
+            <div class="feat-empty" id="roleFeatureEmpty" hidden>No matching flags.</div>
+          </div>
+
+          <!-- Tab 4: Limits -->
+          <div class="role-tabpanel" id="rtab-limits" hidden>
+            <div class="info-note">
+              <i class="ti ti-info-circle"></i>
+              <span>These are role-level defaults only. Assigning a user to this role pre-fills their caps on the Limits and AI credits screen at the time of assignment. Editing a value here does not retroactively change caps already set on users currently in this role. Admins can still override any individual user's cap afterward on the Limits and AI credits screen.</span>
+            </div>
+            <div id="roleLimitsBody"><!-- injected --></div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Limits and AI credits tab -->
+      <div id="tab-limits" hidden>
+        <div class="page-head">
+          <div class="titles">
+            <h1>Limits and AI credits</h1>
+            <p>Scoped to this organization</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="search-inline"><i class="ti ti-search"></i><input type="text" placeholder="Search limits..." oninput="filterLimits(this)"></div>
+          <div class="panel-save">
+            <span class="save-state" hidden></span>
+            <button class="btn btn-primary" onclick="savePanel(this)">Save changes</button>
+          </div>
+        </div>
+
+        <div id="limitsBody"><!-- limit flags injected --></div>
+
+        <div class="feat-empty" hidden>No matching limits.</div>
+      </div>
+
+      <!-- Inert placeholder for other tabs -->
+      <div id="tab-placeholder" hidden>
+        <div class="page-head">
+          <div class="titles">
+            <h1 id="phHeading">Section</h1>
+            <p>Scoped to this organization</p>
+          </div>
+        </div>
+        <div class="placeholder">
+          <i class="ti ti-tools"></i>
+          <div class="ph-title">Not built in this mockup</div>
+          <div>This section is out of scope for this prototype.</div>
+        </div>
+      </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3: NEW ORGANIZATION WIZARD ============ -->
+<div id="screen-new-org-wizard" hidden>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-mark">L</div>
+      <div class="brand-name">Lumenore</div>
+    </div>
+    <div class="topsearch">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Search organizations, users, dashboards, schemas...">
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-sm btn-accent-outline"><i class="ti ti-rocket"></i> Plan details</button>
+      <button class="icon-btn" title="Help"><i class="ti ti-help-circle"></i></button>
+      <button class="icon-btn" title="What's new"><i class="ti ti-device-desktop"></i></button>
+      <button class="icon-btn" title="Notifications"><i class="ti ti-bell"></i></button>
+      <div class="topbar-sep"></div>
+      <span class="role-badge"><i class="ti ti-shield-lock" style="font-size:15px"></i> Netlink master</span>
+      <div class="avatar">RV</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <main class="main" style="flex:1">
+      <div class="page-head">
+        <div class="titles">
+          <h1>New organization</h1>
+          <p>Create a new organization in four steps.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="closeNewOrgWizard()"><i class="ti ti-x"></i> Cancel</button>
+        </div>
+      </div>
+
+      <div id="wizardSteps" class="wiz-steps"><!-- step indicator injected --></div>
+      <div id="wizardBody"><!-- step body injected --></div>
+
+      <div class="wiz-foot">
+        <button class="btn" id="wizBack" onclick="wizardBack()"><i class="ti ti-arrow-left"></i> Back</button>
+        <button class="btn btn-primary" id="wizNext" onclick="wizardNext()">Next <i class="ti ti-arrow-right"></i></button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ Dependency confirmation modal ============ -->
+<div id="depModal" class="modal-overlay" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h3 id="depModalTitle">Turn off feature?</h3>
+    </div>
+    <div class="modal-body" id="depModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeDepModal(false)">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger)" onclick="closeDepModal(true)">Turn off anyway</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const orgs = [
+    {id:'ORG-10428', name:'Acme Health Systems',    parent:'',                     industry:'Healthcare',    plan:'Enterprise', users:42,  active:true},
+    {id:'ORG-10517', name:'Northwind Retail Group',  parent:'Northwind Holdings',   industry:'Retail',        plan:'Business',   users:186, active:true},
+    {id:'ORG-10689', name:'Vertex Financial',        parent:'',                     industry:'Finance',       plan:'Enterprise', users:73,  active:true},
+    {id:'ORG-10744', name:'Brightpath Analytics',    parent:'Northwind Holdings',   industry:'Technology',    plan:'Trial',      users:9,   active:true},
+    {id:'ORG-10802', name:'Ironclad Manufacturing',  parent:'',                     industry:'Manufacturing', plan:'Business',   users:54,  active:false},
+  ];
+
+  function renderOrgs(){
+    const tb = document.getElementById('orgTableBody');
+    tb.innerHTML = orgs.map((o,i)=>`
+      <tr>
+        <td>
+          <div class="org-name">${o.name}</div>
+          <div class="org-id">${o.id}</div>
+        </td>
+        <td>${o.parent ? `<span class="cell-muted">${o.parent}</span>` : `<span class="cell-dash">—</span>`}</td>
+        <td>
+          <div class="status-cell">
+            <button class="toggle ${o.active?'on':''}" onclick="toggleStatus(this,${i})" aria-label="Toggle status"></button>
+            <span class="status-text">${o.active?'Active':'Inactive'}</span>
+          </div>
+        </td>
+        <td style="text-align:right">
+          <div class="action-group">
+            <button class="ag-btn" onclick='manageOrg(${JSON.stringify(o)},"users")'><i class="ti ti-users"></i> Users</button>
+            <div class="ag-div"></div>
+            <button class="ag-btn" onclick='manageOrg(${JSON.stringify(o)},"roles")'><i class="ti ti-shield"></i> Role</button>
+            <div class="ag-div"></div>
+            <button class="ag-btn ag-caret" onclick="toggleRowMenu(event,this)"><i class="ti ti-chevron-down"></i></button>
+            <div class="row-menu">
+              <button onclick='manageOrg(${JSON.stringify(o)},"features")'><i class="ti ti-toggle-left"></i> Feature management</button>
+              <button onclick='manageOrg(${JSON.stringify(o)},"limits")'><i class="ti ti-gauge"></i> Limits and AI credits</button>
+              <button onclick='manageOrg(${JSON.stringify(o)},"dashboards")'><i class="ti ti-layout-dashboard"></i> Dashboards</button>
+              <button onclick='manageOrg(${JSON.stringify(o)},"storyboards")'><i class="ti ti-presentation"></i> Storyboards</button>
+              <button onclick='manageOrg(${JSON.stringify(o)},"datasets")'><i class="ti ti-table"></i> Datasets</button>
+              <button onclick='manageOrg(${JSON.stringify(o)},"schema")'><i class="ti ti-schema"></i> Schema</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function toggleStatus(btn, i){
+    orgs[i].active = !orgs[i].active;
+    btn.classList.toggle('on', orgs[i].active);
+    btn.parentElement.querySelector('.status-text').textContent = orgs[i].active ? 'Active' : 'Inactive';
+  }
+
+  function toggleSubnav(btn){
+    const group = btn.closest('.nav-expand');
+    const sub = group.querySelector('.subnav');
+    const open = group.classList.toggle('open');
+    sub.hidden = !open;
+  }
+
+  function closeAllRowMenus(){
+    document.querySelectorAll('.action-group.open').forEach(g=>g.classList.remove('open'));
+  }
+
+  function toggleRowMenu(event, btn){
+    event.stopPropagation();
+    const group = btn.closest('.action-group');
+    const menu = group.querySelector('.row-menu');
+    const wasOpen = group.classList.contains('open');
+    closeAllRowMenus();
+    if(!wasOpen){
+      const r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, r.right - menu.offsetWidth || r.right - 210) + 'px';
+      group.classList.add('open');
+      // reposition after render (menu now visible, has real width)
+      requestAnimationFrame(()=>{
+        menu.style.left = (r.right - menu.offsetWidth) + 'px';
+      });
+    }
+  }
+
+  document.addEventListener('click', closeAllRowMenus);
+
+  function manageOrg(o, tab){
+    closeAllRowMenus();
+    document.getElementById('ctxName').textContent = 'Managing ' + o.name;
+    document.getElementById('ctxMeta').textContent = `${o.industry} · ${o.plan} plan`;
+    document.getElementById('usersSub').textContent = `${o.users} users in ${o.name}`;
+    activateTab(tab || 'users');
+    document.getElementById('screen-orgs').hidden = true;
+    document.getElementById('screen-context').hidden = false;
+    window.scrollTo(0,0);
+  }
+
+  function showOrgs(){
+    document.getElementById('screen-context').hidden = true;
+    document.getElementById('screen-orgs').hidden = false;
+    window.scrollTo(0,0);
+  }
+
+  const tabLabels = {
+    roles:'Role management',
+    dashboards:'Dashboards', storyboards:'Storyboards', datasets:'Datasets', schema:'Schema',
+  };
+
+  function selectTab(el){
+    activateTab(el.dataset.tab);
+  }
+
+  function activateTab(tab){
+    document.querySelectorAll('#screen-context .nav-item').forEach(n=>n.classList.remove('active'));
+    const navItem = document.querySelector(`#screen-context .nav-item[data-tab="${tab}"]`);
+    if(navItem) navItem.classList.add('active');
+
+    const builtTabs = {users:'tab-users', roles:'tab-roles', features:'tab-features', limits:'tab-limits', billing:'tab-billing'};
+    const ph = document.getElementById('tab-placeholder');
+    Object.values(builtTabs).forEach(id => document.getElementById(id).hidden = true);
+
+    if(builtTabs[tab]){
+      document.getElementById(builtTabs[tab]).hidden = false;
+      ph.hidden = true;
+      if(tab==='features') renderFeatureManagement();
+      if(tab==='roles'){
+        // Always land on the role list when navigating in from the sidebar.
+        document.getElementById('roleDetailScreen').hidden = true;
+        document.getElementById('roleListScreen').hidden = false;
+        renderRoleList();
+      }
+      if(tab==='billing') renderBilling();
+      if(tab==='limits') renderLimits();
+    } else {
+      ph.hidden = false;
+      document.getElementById('phHeading').textContent = tabLabels[tab];
+    }
+  }
+
+  /* ============================================================
+     Feature flag catalogue — single source of truth
+     ui: toggle | text | number | image | dropdown | langpicker
+         | group (sub toggles/numbers) | json (decomposed fields)
+         | readonly (data, no control) | preset (org+user bundle)
+         | eng (engineering-only, disabled row)
+     ============================================================ */
+  const PENDING = 'Description pending from engineering.';
+  const FLAG_CATALOGUE = [
+    // ---------- Branding & Appearance ----------
+    {cat:'Branding & Appearance', key:'baselogo', name:'Base logo', ui:'image', value:'customer-logo-cloud.png', icon:'ti-cloud', desc:PENDING},
+    {cat:'Branding & Appearance', key:'backgroundimage', name:'Background image', ui:'image', value:'spear.jpg', icon:'ti-photo', desc:PENDING},
+    {cat:'Branding & Appearance', key:'clientlogo', name:'Client logo', ui:'image', value:'logo.png', icon:'ti-photo', desc:PENDING},
+    {cat:'Branding & Appearance', key:'footer', name:'Footer', ui:'text', value:'netlink', desc:PENDING},
+    {cat:'Branding & Appearance', key:'heading', name:'Heading', ui:'json', desc:'Title and subtitle shown on the workspace landing screen.',
+      sub:[{key:'title', name:'Title', type:'text', value:'Lumenore'}, {key:'subtitle', name:'Subtitle', type:'text', value:'Lumenore'}]},
+    {cat:'Branding & Appearance', key:'landingImage', name:'Landing image', ui:'image', value:'landing-image.png', icon:'ti-photo', desc:PENDING, note:'Stored as a base64 image blob — uploads replace the encoded value.'},
+    {cat:'Branding & Appearance', key:'newLandingPage', name:'New landing page', ui:'group', desc:'Enable new dashboard landing page at org level.',
+      sub:[{key:'newLandingPage', name:'New landing page', type:'toggle', value:true}, {key:'showRecent', name:'Show recent', type:'toggle', value:false}, {key:'showFav', name:'Show favorites', type:'toggle', value:false}]},
+    {cat:'Branding & Appearance', key:'header', name:'Header', ui:'text', value:'Lumenore', desc:'Text shown in the product header bar.'},
+    {cat:'Branding & Appearance', key:'tagLine', name:'Tag line', ui:'text', value:'Business Analytics Platform', desc:'Short descriptor shown beside the product name.'},
+
+    // ---------- Security & Access ----------
+    {cat:'Security & Access', key:'adminPanel', name:'Admin panel', ui:'toggle', value:false, desc:'Disable admin panel in profile section.'},
+    {cat:'Security & Access', key:'signUp', name:'Sign up', ui:'toggle', value:false, desc:'Show / hide sign-up on the login page.'},
+    {cat:'Security & Access', key:'passwordExpiry', name:'Password expiration', ui:'group', desc:'Notify on password expiration; expiry duration set separately.',
+      sub:[{key:'notifyPasswordExpirationDays', name:'Notify on expiration', type:'toggle', value:false}, {key:'passwordExpiryDuration', name:'Expiry duration', type:'number', value:10, suffix:'days'}]},
+    {cat:'Security & Access', key:'isDefaultPassword', name:'Default password required', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Security & Access', key:'ssoLoginEnabled', name:'Microsoft SSO login', ui:'toggle', value:false, desc:'Disable Microsoft authentication.'},
+    {cat:'Security & Access', key:'ssoLinkedinEnabled', name:'LinkedIn SSO login', ui:'toggle', value:false, desc:'Enable LinkedIn SSO.'},
+    {cat:'Security & Access', key:'hideInputs', name:'Hide user inputs', ui:'toggle', value:false, desc:'Hides user data in the admin module (compliance / PII).'},
+    {cat:'Security & Access', key:'privacyAcceptance', name:'Privacy acceptance', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Security & Access', key:'agreement', name:'Agreement', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Security & Access', key:'captcha', name:'Captcha', ui:'toggle', value:false, desc:'Show captcha on login / signup forms.'},
+    {cat:'Security & Access', key:'totp', name:'TOTP (2FA)', ui:'totp', value:false, desc:"Require two-factor authentication for this organization's users.",
+      sub:[{key:'totpForce', name:'Force enrolment', type:'toggle', value:false}, {key:'totpGraceperiod', name:'Grace period', type:'number', value:300, suffix:'seconds'}, {key:'totpActiveOn', name:'Active on', type:'date', value:'2021-12-29'}]},
+
+    // ---------- AI & Insights ----------
+    {cat:'AI & Insights', key:'smartAssistance', name:'Smart assistance', ui:'toggle', value:false, desc:'Disable smart assistance.'},
+    {cat:'AI & Insights', key:'analyzer', name:'Analyzer (Examiner)', ui:'toggle', value:true, desc:"Enable Analyzer. Won't work if 'custom' is enabled."},
+    {cat:'AI & Insights', key:'dykmanager', name:'Do You Know service', ui:'toggle', value:false, desc:"Disable 'Do You Know' service."},
+    {cat:'AI & Insights', key:'askme', name:'Ask Me service', ui:'toggle', value:false, desc:'Disable Ask Me service.'},
+    {cat:'AI & Insights', key:'isdoYouKnow', name:'Do You Know insights', ui:'toggle', value:true, desc:PENDING},
+    {cat:'AI & Insights', key:'aidashboard', name:'AI dashboard / Lumenore-AI', ui:'group', desc:'Enable Auto Dashboard / enable Lumenore-AI.',
+      sub:[{key:'aidashboard', name:'Auto Dashboard', type:'toggle', value:true}, {key:'askmegpt', name:'Lumenore-AI (Ask Me GPT)', type:'toggle', value:true}]},
+    {cat:'AI & Insights', key:'aiInsights', name:'Narrative insights', ui:'group', desc:'Enable narrative insights in Do You Know and AI Dashboard.',
+      sub:[{key:'aiDoYouKnow', name:'AI Do You Know', type:'toggle', value:true}, {key:'explanatoryInsights', name:'Explanatory insights', type:'toggle', value:true}, {key:'narrativeInsights', name:'Narrative insights', type:'toggle', value:true}, {key:'aiInsights', name:'AI insights', type:'toggle', value:true}]},
+    {cat:'AI & Insights', key:'doyouknowPanel', name:'Do-You-Know home panel', ui:'toggle', value:true, desc:'Show the Do-You-Know panel on the homepage.'},
+    {cat:'AI & Insights', key:'summary', name:'Summary panel', ui:'toggle', value:false, desc:'AI-generated summary panel.'},
+
+    // ---------- Sharing & Collaboration ----------
+    {cat:'Sharing & Collaboration', key:'instaSharing', name:'Instant sharing', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'export', name:'Export', ui:'toggle', value:true, desc:'Enable export feature.'},
+    {cat:'Sharing & Collaboration', key:'pptExport', name:'PPT / PDF export', ui:'toggle', value:true, desc:'Enable PPT (multipage) and PDF (multipage) export.'},
+    {cat:'Sharing & Collaboration', key:'widgetSharing', name:'Widget sharing', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'sharing', name:'Sharing', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'sharingmanager', name:'Sharing manager', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'filepublications', name:'File publications', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'forceSharing', name:'Force sharing', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'ppt', name:'PPT export (legacy)', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'collaboration', name:'Collaboration', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Sharing & Collaboration', key:'filepublicationGroup', name:'Publications & full export', ui:'group', desc:'filepublication enables the Manage section; fullDataExport enables full data export.',
+      sub:[{key:'filepublication', name:'File publication', type:'toggle', value:true}, {key:'fullDataExport', name:'Full data export', type:'toggle', value:true}]},
+    {cat:'Sharing & Collaboration', key:'socialChannels', name:'Social channels', ui:'toggle', value:false, desc:'Enable sharing on social platforms.'},
+    {cat:'Sharing & Collaboration', key:'sharingConfig', name:'Sharing config', ui:'group', desc:'Enable WhatsApp and Teams sharing.',
+      sub:[{key:'showSharingCentralization', name:'Sharing centralization', type:'toggle', value:true}, {key:'showWhatsAppSharing', name:'WhatsApp sharing', type:'toggle', value:true}, {key:'showTeamsSharing', name:'Teams sharing', type:'toggle', value:true}]},
+
+    // ---------- Notifications ----------
+    {cat:'Notifications', key:'emailPreference', name:'Email preferences', ui:'toggle', value:false, desc:'Disable email preferences in profile.'},
+    {cat:'Notifications', key:'thresholdmanager', name:'Threshold manager', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Notifications', key:'activity_center', name:'Activity center', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Notifications', key:'emailattachment', name:'Email attachment', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Notifications', key:'threshold', name:'Alert threshold', ui:'number', value:'', suffix:'', desc:'Alert threshold setting.'},
+
+    // ---------- Limits & Consumption ----------
+    {cat:'Limits & Consumption', key:'emailDailyLimit', name:'Email daily limit', ui:'number', value:200, suffix:'per user', desc:'Daily email limit per user.'},
+    {cat:'Limits & Consumption', key:'emailHourlyLimit', name:'Email hourly limit', ui:'number', value:100, suffix:'per user', desc:'Hourly email limit per user.'},
+    {cat:'Limits & Consumption', key:'hardLimit', name:'Hard limit', ui:'number', value:'', desc:PENDING},
+    {cat:'Limits & Consumption', key:'softLimit', name:'Soft limit', ui:'number', value:'', desc:PENDING},
+    {cat:'Limits & Consumption', key:'chartLimits', name:'Chart render limits', ui:'json', desc:'Chart / map / grid render limits.',
+      sub:[{key:'chartLimit', name:'Chart points', type:'number', value:30000}, {key:'mapLimit', name:'Map points', type:'number', value:10000}, {key:'gridLimit', name:'Grid rows', type:'number', value:5000}]},
+    {cat:'Limits & Consumption', key:'savePreferenceLimit', name:'Save preference limit', ui:'number', value:5, desc:'Increase / set preference limit.'},
+    {cat:'Limits & Consumption', key:'storyboard_creation', name:'Storyboard publish limit', ui:'number', value:'', desc:'Storyboard publish limit.'},
+    {cat:'Limits & Consumption', key:'attempts', name:'Login attempts allowed', ui:'number', value:7, desc:'Failed sign-in attempts before lockout.'},
+
+    // ---------- Embed ----------
+    {cat:'Embed', key:'embed', name:'Embed', ui:'toggle', value:false, desc:'Disable embed.'},
+    {cat:'Embed', key:'magicLinkDashboards', name:'Magic-link dashboards', ui:'readonly', value:'[1922, 1923]', desc:'List of dashboard IDs enabled for magic-link embedding (read-only data, not a toggle).'},
+    {cat:'Embed', key:'showEmbedding', name:'Public embedding', ui:'group', desc:'Enable embed. Also requires a matching entry in lum_user_actions for embed.',
+      sub:[{key:'showEmbedding', name:'Show embedding', type:'toggle', value:true}, {key:'publicEmbedded', name:'Public embedded', type:'toggle', value:true}]},
+    {cat:'Embed', key:'showFilterScopeEmbed', name:'Embed filter / info panels', ui:'group', desc:'Disable filter and info panels in the embed link.',
+      sub:[{key:'showFilterScopeEmbed', name:'Filter scope panel', type:'toggle', value:false}, {key:'showInfoEmbed', name:'Info panel', type:'toggle', value:false}]},
+    {cat:'Embed', key:'demo_askme', name:'Ask Me embed link', ui:'toggle', value:true, desc:'Makes Ask Me an embed link.'},
+    {cat:'Embed', key:'privateWithSSOEmbedded', name:'Private embed with SSO', ui:'toggle', value:true, desc:'Enable private embed with SSO.'},
+
+    // ---------- Dashboard & Storyboard ----------
+    {cat:'Dashboard & Storyboard', key:'manage', name:'Manage option', ui:'toggle', value:false, desc:'Enable or disable the Manage option from the landing page.'},
+    {cat:'Dashboard & Storyboard', key:'ranges', name:'Data-range filter', ui:'toggle', value:true, desc:'Data-range filter config.'},
+    {cat:'Dashboard & Storyboard', key:'schedule', name:'Schedule', ui:'toggle', value:true, desc:'Enable schedule.'},
+    {cat:'Dashboard & Storyboard', key:'quickCompare', name:'Quick Compare', ui:'toggle', value:true, desc:'Enable Quick Compare (org & component level).'},
+    {cat:'Dashboard & Storyboard', key:'hideCurrentSelection', name:'Hide current selection', ui:'toggle', value:false, desc:'Hide current selection on workboard.'},
+    {cat:'Dashboard & Storyboard', key:'loadDashboardInitiallyParameterModification', name:'Initial parameter modification', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Dashboard & Storyboard', key:'filterPreference', name:'Filter preference', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Dashboard & Storyboard', key:'kpiChanger', name:'KPI tab limit', ui:'group', desc:'Increase the KPI tab limit.',
+      sub:[{key:'kpiChanger', name:'KPI changer', type:'toggle', value:true}, {key:'kpiTabLimit', name:'KPI tab limit', type:'number', value:100}]},
+    {cat:'Dashboard & Storyboard', key:'scheduleCreatedTab', name:"'Created on' tab", ui:'toggle', value:true, desc:"Enable 'Created on' under Manage."},
+    {cat:'Dashboard & Storyboard', key:'whatIfAnalytics', name:'What-If Analytics', ui:'toggle', value:true, desc:'Enable What-If Analytics.'},
+    {cat:'Dashboard & Storyboard', key:'enableWhatIfParameterMapping', name:'What-If parameter mapping', ui:'toggle', value:true, desc:'Enable What-If parameter mapping at org level.'},
+    {cat:'Dashboard & Storyboard', key:'fitToWidth', name:'Fit to width', ui:'toggle', value:true, desc:'Enable fit-to-width at org level.'},
+    {cat:'Dashboard & Storyboard', key:'enableChoroplethMap', name:'Choropleth map', ui:'toggle', value:true, desc:'Enable Choropleth Map at org or user level.'},
+    {cat:'Dashboard & Storyboard', key:'enableStoryboardFilterMapper', name:'Storyboard filter mapper', ui:'toggle', value:true, desc:'Filter mapper tab.'},
+    {cat:'Dashboard & Storyboard', key:'showSchemaNameOnKpi', name:'Schema name on KPIs', ui:'toggle', value:false, desc:'Hides the schema name on KPIs.'},
+    {cat:'Dashboard & Storyboard', key:'dashboardCustomConfig', name:'Dashboard custom config', ui:'json', desc:'Remove info icon on dashboard.',
+      sub:[{key:'hideInfoIcon', name:'Hide info icon', type:'toggle', value:true}]},
+    {cat:'Dashboard & Storyboard', key:'disableFullScreenOnCustomComponent', name:'Disable fullscreen (custom component)', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Dashboard & Storyboard', key:'uiPreferences', name:'UI preferences', ui:'json', desc:PENDING,
+      sub:[{key:'enableFreezeHeaderMenu', name:'Freeze header menu', type:'toggle', value:false}, {key:'enableExpandCurrentSelection', name:'Expand current selection', type:'toggle', value:false}, {key:'enableFreezeCurrentSelection', name:'Freeze current selection', type:'toggle', value:false}]},
+    {cat:'Dashboard & Storyboard', key:'enableRefreshDataOption', name:'Refresh data option', ui:'toggle', value:true, desc:'Refresh-filter action in dashboards.'},
+
+    // ---------- Data Module ----------
+    {cat:'Data Module', key:'fileUploader', name:'File uploader', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Data Module', key:'datasource', name:'Data source', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Data Module', key:'enableCSV', name:'Enable CSV', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Data Module', key:'datalayer', name:'Data layer', ui:'groupcounter', desc:'Enable data layer; remaining upload quota is read from the user_actions table.',
+      sub:[{key:'datalayer', name:'Data layer', type:'toggle', value:true}], counter:{name:'File uploads remaining', value:'42 (read-only)'}},
+    {cat:'Data Module', key:'enableDatasetCreationOnDatasetSharing', name:'Schema on shared dataset', ui:'toggle', value:true, desc:'Enable creating a schema on a shared dataset.'},
+    {cat:'Data Module', key:'dataManagement', name:'Data management module', ui:'toggle', value:false, desc:'Key to disable the Data module.'},
+    {cat:'Data Module', key:'tabVisibilityBundle', name:'Data-only tab visibility', ui:'preset', desc:"Show only the 'Data' tab for a user. Requires the same keys set at BOTH org level (false) and user level (true) — a two-level preset, not a single toggle."},
+    {cat:'Data Module', key:'dataTabGroup', name:'Dashboard tab visibility', ui:'group', desc:'Sub-items of the tab-visibility bundle, under the Data module.',
+      sub:[{key:'showDashboardHomePageBanner', name:'Home page banner', type:'toggle', value:true}, {key:'showDashboardSharedWithMeTab', name:'Shared-with-me tab', type:'toggle', value:true}, {key:'showDashboardCardActions', name:'Card actions', type:'toggle', value:true}, {key:'selfServiceData', name:'Self service', type:'toggle', value:true}]},
+    {cat:'Data Module', key:'bulkUserUpload', name:'Bulk user upload', ui:'toggle', value:true, sublabel:'User list actions', desc:'Gates the Bulk upload button on the User list screen.'},
+    {cat:'Data Module', key:'bulkUserTemplate', name:'Bulk user template', ui:'toggle', value:true, sublabel:'User list actions', desc:'Gates the CSV-template download button on the User list screen.'},
+
+    // ---------- Localization (folded into Product & UI Toggles — single flag, below 3-item threshold) ----------
+    {cat:'Product & UI Toggles', key:'language', name:'Language support', ui:'langpicker', value:'ar', desc:'Enable Arabic language support.'},
+
+    // ---------- Product & UI Toggles ----------
+    {cat:'Product & UI Toggles', key:'selfService', name:'Self service', ui:'toggle', value:false, desc:'Enable or disable self service.'},
+    {cat:'Product & UI Toggles', key:'explorePanel', name:'Explore panel', ui:'toggle', value:false, desc:'Disable explore panel.'},
+    {cat:'Product & UI Toggles', key:'guidedTour', name:'Guided tour', ui:'toggle', value:false, desc:'Disable guided tour.'},
+    {cat:'Product & UI Toggles', key:'chatbot', name:'Chatbot', ui:'toggle', value:false, desc:'Disable the message / chat icon.'},
+    {cat:'Product & UI Toggles', key:'feedbackPanel', name:'Feedback panel', ui:'toggle', value:false, desc:'Disable feedback panel.'},
+    {cat:'Product & UI Toggles', key:'home', name:'Home / onboarding', ui:'toggle', value:false, desc:'Disable onboarding.'},
+    {cat:'Product & UI Toggles', key:'onBoard', name:'Onboard', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'report_an_issue', name:'Report an issue', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'enableLoadInfo', name:'Load info', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'analyticsApps', name:'Analytics apps', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'helpCenter', name:'Help center', ui:'toggle', value:true, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'selfserviceVersion', name:'Self Service 2.0', ui:'toggle', value:false, desc:'Enable Self Service 2.0.'},
+    {cat:'Product & UI Toggles', key:'disableTracker', name:'Disable tracker', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'performance', name:'Performance mode', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'support', name:'Support button', ui:'toggle', value:true, desc:'Enable support button.'},
+    {cat:'Product & UI Toggles', key:'newPlatformUI', name:'New platform UI', ui:'toggle', value:true, desc:'Enable the new UI at org level.'},
+    {cat:'Product & UI Toggles', key:'showProductOnboarding', name:'Product onboarding', ui:'toggle', value:false, desc:'Disable product onboarding.'},
+    {cat:'Product & UI Toggles', key:'showProductTour', name:'Product tour', ui:'toggle', value:false, desc:'Product tour toggle.'},
+    {cat:'Product & UI Toggles', key:'defaultPage', name:'Default landing page', ui:'dropdown', value:'dashboard', options:['home','dashboard','data','askme'], desc:'Change the landing module from the Home tab to another module.'},
+    {cat:'Product & UI Toggles', key:'apps', name:'Apps launcher', ui:'toggle', value:false, desc:PENDING},
+    {cat:'Product & UI Toggles', key:'getHelp', name:'Get help', ui:'toggle', value:false, desc:PENDING},
+
+    // ---------- Engineering only (disabled rows) ----------
+    {cat:'Engineering only', key:'emailProvider', name:'Email provider', ui:'eng', desc:'Infra-level email provider configuration.'},
+    {cat:'Engineering only', key:'defaultPassword', name:'Default password', ui:'eng', hideValue:true, desc:'Encrypted credential — never rendered in a UI field, even masked.'},
+    {cat:'Engineering only', key:'groupDataCall', name:'Group data call', ui:'eng', desc:'Combined user + group API call (bug workaround).'},
+    {cat:'Engineering only', key:'gptAccess', name:'ChatGPT access (per org)', ui:'eng', desc:'Enable ChatGPT for a specific org — requires a raw SQL insert with a live API token.'},
+    {cat:'Engineering only', key:'userConfiguration', name:'User configuration', ui:'eng', desc:'App-specific config added to app_details per support ticket.'},
+    {cat:'Engineering only', key:'oauthClientConfig', name:'OAuth client config', ui:'eng', desc:'Raw OAuth client configuration used to extend org session time.'},
+    {cat:'Engineering only', key:'enableMCPMode', name:'MCP mode', ui:'eng', desc:'Enable MCP for a specific user via an API call carrying a bearer token.'},
+    {cat:'Engineering only', key:'enableSchedulingCapability', name:'Scheduling capability', ui:'eng', desc:'Raw DB update to the global_schedule module.'},
+    {cat:'Engineering only', key:'dykSharing', name:'DYK sharing / schedule', ui:'eng', desc:'Raw Mongo update across nested per-insight-type fields.'},
+
+    // ---------- Billing & Licensing (rendered in the Billing tab) ----------
+    {cat:'Billing & Licensing', key:'freemium', name:'Freemium', ui:'toggle', value:false, desc:'Marks the org as freemium tier.'},
+    {cat:'Billing & Licensing', key:'licenses', name:'Licenses', ui:'toggle', value:false, desc:'Enables license-management enforcement.'},
+    {cat:'Billing & Licensing', key:'licensePanel', name:'License panel', ui:'toggle', value:false, desc:'Disable the license / subscription view in profile.'},
+    {cat:'Billing & Licensing', key:'trialExpiration', name:'Trial expiration', ui:'number', value:730, suffix:'days', desc:'Trial length in days.'},
+    {cat:'Billing & Licensing', key:'showPlanDetailsHeader', name:'Plan details in header', ui:'toggle', value:false, desc:'Hide plan details from the header.'},
+  ];
+
+  // In-scope Feature-management categories, in accordion display order.
+  // Limits & Consumption -> Limits screen; Billing & Licensing -> Billing screen;
+  // Localization folded into Product & UI Toggles. Engineering only is deprioritized (last).
+  const FEATURE_CATEGORIES = [
+    'Dashboard & Storyboard','Product & UI Toggles','Sharing & Collaboration','Security & Access',
+    'AI & Insights','Branding & Appearance','Data Module','Notifications','Embed','Engineering only'
+  ];
+  const CAT_ICON = {
+    'Branding & Appearance':'ti-palette','Security & Access':'ti-shield-lock','AI & Insights':'ti-sparkles',
+    'Sharing & Collaboration':'ti-share','Notifications':'ti-bell','Limits & Consumption':'ti-gauge',
+    'Embed':'ti-code','Dashboard & Storyboard':'ti-layout-dashboard','Data Module':'ti-database',
+    'Localization':'ti-language','Product & UI Toggles':'ti-adjustments','Engineering only':'ti-tool',
+    'Administrative':'ti-user-cog'
+  };
+
+  /* ---------- Shared mock state ---------- */
+  const orgFeatureState = {};              // key -> current value (org level)
+  const flagIndex = {};                    // flat key -> {name, desc} for lookups
+  // Which roles currently grant a given flag now lives in ROLE_STATE (see Role management
+  // section below) -- rolesGrantingFlag(key) is the lookup used by the dependency-confirmation
+  // modal below.
+
+  (function seedState(){
+    FLAG_CATALOGUE.forEach(f=>{
+      flagIndex[f.key] = {name:f.name, desc:f.desc};
+      if(['toggle','text','number','dropdown','image','langpicker'].includes(f.ui)){
+        orgFeatureState[f.key] = f.value;
+      }
+      (f.sub||[]).forEach(s=>{
+        orgFeatureState[s.key] = s.value;
+        flagIndex[s.key] = {name:s.name, desc:f.desc};
+      });
+    });
+    // Admin capabilities used by Role assignment (User-management module flags — org-enabled).
+    ['bulkUserUpload','bulkUserTemplate','aiDoYouKnow'].forEach(k=>{ if(!(k in orgFeatureState)) orgFeatureState[k]=true; });
+    flagIndex.bulkUserUpload = {name:'Bulk user upload', desc:'Enable bulk user upload in User Management.'};
+    flagIndex.bulkUserTemplate = {name:'Bulk user template', desc:'Enable bulk user template in User Management.'};
+    flagIndex.aiDoYouKnow = flagIndex.aiDoYouKnow || {name:'AI Do You Know', desc:'Enable AI Do You Know insights.'};
+  })();
+
+  /* ---------- Feature-management rendering ---------- */
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+  function toggleHtml(key, disabled){
+    const on = !!orgFeatureState[key];
+    if(disabled) return `<button class="toggle ${on?'on':''}" disabled aria-disabled="true"></button>`;
+    return `<button class="toggle ${on?'on':''}" onclick="flipFeatureToggle(this,'${key}')" aria-label="Toggle ${esc(key)}"></button>`;
+  }
+  function subControlHtml(s){
+    if(s.type==='toggle') return `<div class="feat-subrow"><span class="sr-label">${esc(s.name)}<span class="sr-key">${s.key}</span></span>${toggleHtml(s.key,false)}</div>`;
+    if(s.type==='number') return `<div class="feat-field"><label class="feat-label">${esc(s.name)}</label><div class="feat-suffix"><input class="feat-input" type="number" value="${s.value}" oninput="orgFeatureState['${s.key}']=this.value">${s.suffix?`<span>${esc(s.suffix)}</span>`:''}</div></div>`;
+    if(s.type==='date') return `<div class="feat-field"><label class="feat-label">${esc(s.name)}</label><input class="feat-input" type="date" value="${s.value}"></div>`;
+    return `<div class="feat-field"><label class="feat-label">${esc(s.name)}</label><input class="feat-input" type="text" value="${esc(s.value)}"></div>`;
+  }
+
+  function featureCardHtml(f){
+    const search = (f.name+' '+f.key+' '+(f.desc||'')).toLowerCase();
+    const head = (extra='') => `<div class="feat-card-head"><span class="feat-name">${esc(f.name)}<span class="feat-key">${f.key}</span></span>${extra}</div>`;
+    const desc = `<div class="feat-desc">${esc(f.desc||'')}</div>`;
+    let inner='';
+    switch(f.ui){
+      case 'eng':
+        return `<div class="feat-card feat-disabled" data-name="${esc(search)}">
+          <div class="feat-card-head"><span class="feat-name">${esc(f.name)}<span class="feat-key">${f.key}</span></span>
+            <span class="badge eng feat-eng-badge"><i class="ti ti-tool" style="font-size:13px"></i> Requires engineering</span></div>
+          ${desc}</div>`;
+      case 'toggle': {
+        const sub = f.sublabel ? `<span class="feat-sublabel"><i class="ti ti-external-link"></i>${esc(f.sublabel)}</span>` : '';
+        return `<div class="feat-card" data-name="${esc(search)}">${head(sub+toggleHtml(f.key,false))}${desc}</div>`;
+      }
+      case 'text':
+        inner = `<div class="feat-field"><input class="feat-input" type="text" value="${esc(f.value||'')}" oninput="orgFeatureState['${f.key}']=this.value"></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'number':
+        inner = `<div class="feat-field"><div class="feat-suffix"><input class="feat-input" type="number" value="${f.value}" style="max-width:200px" oninput="orgFeatureState['${f.key}']=this.value">${f.suffix?`<span>${esc(f.suffix)}</span>`:''}</div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'image':
+        inner = `<div class="logo-row"><div class="logo-thumb"><i class="ti ${f.icon||'ti-photo'}"></i></div><div class="logo-file">${esc(f.value||'')}</div><button class="btn btn-sm" style="margin-left:auto"><i class="ti ti-upload"></i> Replace</button></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}${f.note?`<div class="feat-readonly-note"><i class="ti ti-info-circle"></i>${esc(f.note)}</div>`:''}</div>`;
+      case 'dropdown':
+        inner = `<div class="feat-field"><div class="select" style="display:inline-block"><select onchange="orgFeatureState['${f.key}']=this.value">${f.options.map(o=>`<option value="${o}" ${o===f.value?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}</select><i class="ti ti-chevron-down"></i></div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'langpicker':
+        inner = `<div class="feat-field"><label class="feat-label">Enabled language</label><div class="select" style="display:inline-block"><select><option value="ar" selected>Arabic (ar)</option><option value="en">English (en)</option><option value="fr">French (fr)</option><option value="es">Spanish (es)</option></select><i class="ti ti-chevron-down"></i></div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}<div class="feat-readonly-note"><i class="ti ti-info-circle"></i>One of several language entries — confirm the full list with engineering.</div></div>`;
+      case 'readonly':
+        inner = `<div class="feat-chips"><span class="feat-chip">${esc(f.value)}</span></div><div class="feat-readonly-note"><i class="ti ti-lock"></i>Read-only data — not a settable flag.</div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'preset':
+        inner = `<div class="feat-readonly-note"><i class="ti ti-stack-2"></i>Two-level preset (org + user). Needs a dedicated bundle control rather than a single toggle.</div><button class="btn btn-sm" style="margin-top:10px"><i class="ti ti-settings"></i> Configure preset</button>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'totp':
+        inner = `<button class="feat-expand" onclick="toggleTotpDetail(this)"><i class="ti ti-chevron-right"></i> Configure</button>
+          <div class="feat-sub" hidden><div class="feat-group-body">${f.sub.map(subControlHtml).join('')}</div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head(toggleHtml(f.key,false))}${desc}${inner}</div>`;
+      case 'group':
+      case 'json':
+        inner = `<div class="feat-sub" style="margin-top:12px"><div class="feat-group-body">${f.sub.map(subControlHtml).join('')}</div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+      case 'groupcounter':
+        inner = `<div class="feat-sub" style="margin-top:12px"><div class="feat-group-body">${f.sub.map(subControlHtml).join('')}</div><div class="feat-readonly-note"><i class="ti ti-lock"></i>${esc(f.counter.name)}: ${esc(f.counter.value)}</div></div>`;
+        return `<div class="feat-card" data-name="${esc(search)}">${head()}${desc}${inner}</div>`;
+    }
+    return '';
+  }
+
+  function renderFeatureManagement(){
+    const acc = document.getElementById('featureAccordion');
+    acc.innerHTML = FEATURE_CATEGORIES.map(c=>{
+      const flags = FLAG_CATALOGUE.filter(f=>f.cat===c);
+      const muted = c==='Engineering only' ? ' acc-muted' : '';
+      const cards = flags.map(featureCardHtml).join('');
+      return `<section class="acc${muted}" data-cat="${esc(c)}">
+        <button class="acc-head" aria-expanded="false" onclick="toggleAccordion(this)">
+          <i class="ti ${CAT_ICON[c]||'ti-list'} acc-icon"></i>
+          <span class="acc-title">${esc(c)}</span>
+          <span class="acc-count">${flags.length}</span>
+          <i class="ti ti-chevron-down acc-chev"></i>
+        </button>
+        <div class="acc-body" hidden>${cards}</div>
+      </section>`;
+    }).join('');
+    const s = document.getElementById('featureSearch');
+    if(s) s.value='';
+    document.getElementById('featureEmpty').hidden = true;
+  }
+
+  function setAccordionOpen(section, open){
+    section.classList.toggle('open', open);
+    section.querySelector('.acc-head').setAttribute('aria-expanded', open ? 'true' : 'false');
+    section.querySelector('.acc-body').hidden = !open;
+  }
+
+  function toggleAccordion(btn){
+    const section = btn.closest('.acc');
+    setAccordionOpen(section, !section.classList.contains('open'));
+  }
+
+  /* ---------- Toggle + dependency modal ---------- */
+  let pendingToggle = null;
+  function flipFeatureToggle(btn, key){
+    const turningOff = !!orgFeatureState[key];
+    const roles = turningOff ? rolesGrantingFlag(key) : [];
+    if(turningOff && roles.length){
+      pendingToggle = {btn, key};
+      const name = (flagIndex[key]||{}).name || key;
+      document.getElementById('depModalBody').innerHTML =
+        `<strong>${esc(name)}</strong> is currently granted to ${roles.length} role(s): <strong>${roles.map(esc).join(', ')}</strong>. `+
+        `Turning this off at the org level will revoke it from all users in those roles. Continue?`;
+      document.getElementById('depModal').hidden = false;
+      return;
+    }
+    orgFeatureState[key] = !orgFeatureState[key];
+    btn.classList.toggle('on', orgFeatureState[key]);
+  }
+
+  function closeDepModal(confirmed){
+    document.getElementById('depModal').hidden = true;
+    if(!pendingToggle){ return; }
+    if(confirmed){
+      const {btn, key} = pendingToggle;
+      orgFeatureState[key] = false;
+      btn.classList.remove('on');
+      renderRoleDetail(); // Role management reads the same orgFeatureState via isFlagOrgEnabled()
+    }
+    pendingToggle = null;
+  }
+
+  function savePanel(btn){
+    const state = btn.closest('.panel-save').querySelector('.save-state');
+    state.textContent = '✓ Saved';
+    state.className = 'save-state ok';
+    state.hidden = false;
+    clearTimeout(state._t);
+    state._t = setTimeout(()=>{ state.hidden = true; }, 2000);
+  }
+
+  // Global search across every category: expand only matching sections, collapse the
+  // rest, reveal only matching rows, then scroll to + flash the first hit.
+  function featureSearchAll(input){
+    const q = input.value.trim().toLowerCase();
+    const sections = document.querySelectorAll('#featureAccordion .acc');
+    let totalMatches = 0;
+    let firstHit = null;
+
+    sections.forEach(section=>{
+      const cards = section.querySelectorAll('.feat-card');
+      let sectionMatches = 0;
+      cards.forEach(card=>{
+        card.classList.remove('feat-hit');
+        const match = !q || card.dataset.name.includes(q);
+        card.hidden = q ? !match : false;
+        if(q && match){ sectionMatches++; if(!firstHit) firstHit = card; }
+      });
+      if(q){
+        setAccordionOpen(section, sectionMatches > 0);
+        totalMatches += sectionMatches;
+      } else {
+        setAccordionOpen(section, false); // cleared search -> collapse everything
+      }
+    });
+
+    document.getElementById('featureEmpty').hidden = !q || totalMatches > 0;
+
+    if(firstHit){
+      firstHit.scrollIntoView({behavior:'smooth', block:'center'});
+      // restart the flash animation
+      void firstHit.offsetWidth;
+      firstHit.classList.add('feat-hit');
+    }
+  }
+
+  function filterLimits(input){
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('#limitsBody .feat-card').forEach(card=>{
+      const match = !q || card.dataset.name.toLowerCase().includes(q);
+      card.hidden = !match;
+      if(match) shown++;
+    });
+    document.querySelector('#tab-limits > .feat-empty').hidden = shown > 0;
+  }
+
+  function toggleTotpDetail(btn){
+    const open = btn.classList.toggle('open');
+    btn.nextElementSibling.hidden = !open;
+  }
+
+  /* ---------- Billing & licensing ---------- */
+  function renderBilling(){
+    const flags = FLAG_CATALOGUE.filter(f=>f.cat==='Billing & Licensing');
+    document.getElementById('billingFlags').innerHTML = flags.map(featureCardHtml).join('');
+  }
+
+  /* ---------- Limits and AI credits ----------
+     Limit/consumption flags moved off the Feature-management screen live here. */
+  function renderLimits(){
+    const flags = FLAG_CATALOGUE.filter(f=>f.cat==='Limits & Consumption');
+    document.getElementById('limitsBody').innerHTML = flags.map(featureCardHtml).join('');
+    const empty = document.querySelector('#tab-limits > .feat-empty');
+    if(empty) empty.hidden = true;
+  }
+
+  /* ============================================================
+     Role management — two-pane role list + role detail (Assigned
+     users / Permission matrix / Feature access / Limits).
+     ============================================================ */
+
+  // ---------- Org user directory (search pool for Assigned users tab) ----------
+  const ORG_USERS = [
+    {id:'u1',  name:'Priya Nair',        email:'priya.nair@acmehealth.com'},
+    {id:'u2',  name:'Marcus Lee',        email:'marcus.lee@acmehealth.com'},
+    {id:'u3',  name:'Sofia Alvarez',     email:'sofia.alvarez@acmehealth.com'},
+    {id:'u4',  name:'David Osei',        email:'david.osei@acmehealth.com'},
+    {id:'u5',  name:'Elena Petrova',     email:'elena.petrova@acmehealth.com'},
+    {id:'u6',  name:'Jamal Whitfield',   email:'jamal.whitfield@acmehealth.com'},
+    {id:'u7',  name:'Hana Kobayashi',    email:'hana.kobayashi@acmehealth.com'},
+    {id:'u8',  name:'Tomás Fernández',   email:'tomas.fernandez@acmehealth.com'},
+    {id:'u9',  name:'Grace Muthoni',     email:'grace.muthoni@acmehealth.com'},
+    {id:'u10', name:"Ryan O'Connell",    email:'ryan.oconnell@acmehealth.com'},
+    {id:'u11', name:'Aisha Rahman',      email:'aisha.rahman@acmehealth.com'},
+    {id:'u12', name:'Lucas Bergström',   email:'lucas.bergstrom@acmehealth.com'},
+  ];
+
+  // ---------- Roles ----------
+  const ROLES = [
+    {id:'admin',   name:'Admin',   desc:'Full access to every module, org settings, and administrative actions.',                       userIds:['u1','u4']},
+    {id:'editor',  name:'Editor',  desc:'Can create and edit dashboards, datasets and storyboards, but cannot manage users or org settings.', userIds:['u2','u5','u6']},
+    {id:'analyst', name:'Analyst', desc:'Read-write access to analytics content with limited administrative reach.',                      userIds:['u3','u7']},
+    {id:'viewer',  name:'Viewer',  desc:'Read-only access to shared dashboards and storyboards.',                                         userIds:['u8','u9','u10']},
+  ];
+
+  // ---------- Permission matrix (module-level RBAC — separate system from feature flags) ----------
+  const PERM_MODULES = ['Dashboard management','Dataset management','Schema management','Role management','User management','Limits and AI credits','Migration','Usage analytics','Billing and licensing'];
+  const PERM_ACTIONS = ['view','create','edit','delete'];
+
+  // Backing key names for the matrix's generic View/Create/Edit/Delete columns, per
+  // role_level_permissions.xlsx rows UA1-UA7 (userAcceptance admin-capability config object).
+  // Used only to surface the real key as a tooltip -- the checkbox itself still just toggles
+  // matrix[module][action], same as every other row.
+  const MODULE_PERM_KEYS = {
+    'Role management': {view:'showRoles', create:'addRole', edit:'editRole', delete:'deleteRole'},
+    // No `deleteUser` key exists in the source payload -- only userList/addUser/modifyUser are
+    // confirmed. This Delete checkbox has no confirmed backend key; do not assume it maps to a
+    // hard-delete action until product confirms what (if anything) it should call.
+    'User management': {view:'userList', create:'addUser', edit:'modifyUser'},
+  };
+
+  function defaultMatrixFor(roleId){
+    const m = {};
+    PERM_MODULES.forEach(mod=>{
+      if(roleId==='admin')        m[mod] = {view:true, create:true,  edit:true,  delete:true};
+      else if(roleId==='editor')  m[mod] = {view:true, create:true,  edit:true,  delete:false};
+      else if(roleId==='analyst') m[mod] = {view:true, create:false, edit:false, delete:false};
+      else                        m[mod] = {view:true, create:false, edit:false, delete:false};
+    });
+    if(roleId==='editor'){
+      m['Role management']       = {view:false, create:false, edit:false, delete:false};
+      m['User management']       = {view:false, create:false, edit:false, delete:false};
+      m['Billing and licensing'] = {view:false, create:false, edit:false, delete:false};
+    }
+    if(roleId==='analyst'){
+      m['Role management']       = {view:false, create:false, edit:false, delete:false};
+      m['User management']       = {view:false, create:false, edit:false, delete:false};
+      m['Migration']              = {view:false, create:false, edit:false, delete:false};
+      m['Billing and licensing'] = {view:false, create:false, edit:false, delete:false};
+    }
+    if(roleId==='viewer'){
+      m['Role management']         = {view:false, create:false, edit:false, delete:false};
+      m['User management']         = {view:false, create:false, edit:false, delete:false};
+      m['Migration']                = {view:false, create:false, edit:false, delete:false};
+      m['Billing and licensing']   = {view:false, create:false, edit:false, delete:false};
+      m['Limits and AI credits']   = {view:false, create:false, edit:false, delete:false};
+    }
+    return m;
+  }
+
+  // ---------- Feature access catalogue ----------
+  // 70 role-assignable feature flags, deduplicated and categorized per role_level_permissions.xlsx
+  // ("Role-level permissions" sheet, 70 source rows minus 13 deduped/conflicting re-entries -> 64
+  // Role-assignable rows, per the workbook's own Summary sheet, plus 6 more added from the
+  // userAcceptance rows UA8/UA9/UA10/UA11/UA12/UA14 -- see User management category below). Keys/
+  // labels/category groupings and counts below are taken directly from that workbook -- do not add
+  // or rename flags without going back to the source sheet.
+  const ROLE_FEATURE_CATALOGUE = [
+    // Product & UI toggles (19)
+    {cat:'Product & UI toggles', key:'selfService', label:'Self service'},
+    {cat:'Product & UI toggles', key:'explorePanel', label:'Explore panel'},
+    {cat:'Product & UI toggles', key:'guidedTour', label:'Guided tour'},
+    {cat:'Product & UI toggles', key:'chatbot', label:'Chat icon'},
+    {cat:'Product & UI toggles', key:'feedbackPanel', label:'Feedback panel'},
+    {cat:'Product & UI toggles', key:'onBoard', label:'Onboarding'},
+    {cat:'Product & UI toggles', key:'report_an_issue', label:'Report an issue'},
+    {cat:'Product & UI toggles', key:'enableLoadInfo', label:'Load info'},
+    {cat:'Product & UI toggles', key:'analyticsApps', label:'Analytics apps'},
+    {cat:'Product & UI toggles', key:'helpCenter', label:'Help center'},
+    {cat:'Product & UI toggles', key:'disableTracker', label:'Activity tracker'},
+    {cat:'Product & UI toggles', key:'performance', label:'Performance mode'},
+    {cat:'Product & UI toggles', key:'selfserviceVersion', label:'Self service 2.0'},
+    {cat:'Product & UI toggles', key:'showProductOnboarding', label:'Product onboarding'},
+    {cat:'Product & UI toggles', key:'support', label:'Support button'},
+    {cat:'Product & UI toggles', key:'newPlatformUI', label:'New platform UI'},
+    {cat:'Product & UI toggles', key:'defaultPage', label:'Default landing page'},
+    {cat:'Product & UI toggles', key:'apps', label:'Apps'},
+    {cat:'Product & UI toggles', key:'getHelp', label:'Get help'},
+    // Dashboard & storyboard (15)
+    {cat:'Dashboard & storyboard', key:'manage', label:'Manage section'},
+    {cat:'Dashboard & storyboard', key:'ranges', label:'Date range filters'},
+    {cat:'Dashboard & storyboard', key:'quickCompare', label:'Quick compare'},
+    {cat:'Dashboard & storyboard', key:'hideCurrentSelection', label:'Hide current selection'},
+    {cat:'Dashboard & storyboard', key:'loadDashboardInitiallyParameterModification', label:'Load dashboard parameter mod'},
+    {cat:'Dashboard & storyboard', key:'filterPreference', label:'Filter preference'},
+    {cat:'Dashboard & storyboard', key:'kpiChanger', label:'KPI tab limit'},
+    {cat:'Dashboard & storyboard', key:'whatIfAnalytics', label:'What-if analytics'},
+    {cat:'Dashboard & storyboard', key:'fitToWidth', label:'Fit to width'},
+    {cat:'Dashboard & storyboard', key:'enableChoroplethMap', label:'Choropleth map'},
+    {cat:'Dashboard & storyboard', key:'enableStoryboardFilterMapper', label:'Storyboard filter mapper'},
+    {cat:'Dashboard & storyboard', key:'showSchemaNameOnKpi', label:'Schema name on KPI'},
+    {cat:'Dashboard & storyboard', key:'dashboardCustomConfig', label:'Dashboard info icon'},
+    {cat:'Dashboard & storyboard', key:'disableFullScreenOnCustomComponent', label:'Full screen on custom component'},
+    {cat:'Dashboard & storyboard', key:'uiPreferences', label:'UI preferences'},
+    // Sharing & collaboration (13)
+    {cat:'Sharing & collaboration', key:'instaSharing', label:'Insta sharing'},
+    {cat:'Sharing & collaboration', key:'export', label:'Export'},
+    {cat:'Sharing & collaboration', key:'pptExport', label:'PPT and PDF export'},
+    {cat:'Sharing & collaboration', key:'widgetSharing', label:'Widget sharing'},
+    {cat:'Sharing & collaboration', key:'sharing', label:'Sharing'},
+    {cat:'Sharing & collaboration', key:'sharingmanager', label:'Sharing manager'},
+    {cat:'Sharing & collaboration', key:'filepublications', label:'File publications'},
+    {cat:'Sharing & collaboration', key:'forceSharing', label:'Force sharing'},
+    {cat:'Sharing & collaboration', key:'ppt', label:'PPT sharing'},
+    {cat:'Sharing & collaboration', key:'collaboration', label:'Collaboration'},
+    {cat:'Sharing & collaboration', key:'filepublication', label:'File publication and export'},
+    {cat:'Sharing & collaboration', key:'socialChannels', label:'Social channels'},
+    {cat:'Sharing & collaboration', key:'sharingConfig', label:'WhatsApp and Teams sharing'},
+    // Data module (8)
+    {cat:'Data module', key:'fileUploader', label:'File uploader'},
+    {cat:'Data module', key:'datasource', label:'Data source access'},
+    {cat:'Data module', key:'enableCSV', label:'CSV export'},
+    {cat:'Data module', key:'datalayer', label:'Data layer'},
+    {cat:'Data module', key:'enableDatasetCreationOnDatasetSharing', label:'Dataset creation on sharing'},
+    {cat:'Data module', key:'dataManagement', label:'Data module access'},
+    // NOTE: dataOnlyView and showDashboardHomePageBanner represent a nested org+user tab-visibility
+    // bundle in the source catalogue (~19-23 related boolean keys), not a single flag each. Rendered
+    // as single "(bundle)" rows for now per spec -- do not silently expand these into their full set
+    // of nested keys without a dedicated multi-key UI pattern and design input.
+    {cat:'Data module', key:'dataOnlyView', label:'Data-only tab view (bundle)'},
+    {cat:'Data module', key:'showDashboardHomePageBanner', label:'Dashboard home banner (bundle)'},
+    // AI & insights (7)
+    {cat:'AI & insights', key:'smartAssistance', label:'Smart assistance'},
+    {cat:'AI & insights', key:'dykmanager', label:'Do you know service'},
+    {cat:'AI & insights', key:'askme', label:'Ask me'},
+    {cat:'AI & insights', key:'isdoYouKnow', label:'Do you know panel'},
+    {cat:'AI & insights', key:'aidashboard', label:'Auto dashboard'},
+    {cat:'AI & insights', key:'aiDoYouKnow', label:'Narrative insights'},
+    {cat:'AI & insights', key:'summary', label:'AI summary panel'},
+    // User management (8) -- bulkUserUpload/bulkUserTemplate from the original catalogue, plus six
+    // more from userAcceptance (rows UA8-UA12, UA14) that are flat booleans like everything else in
+    // this tab, not View/Create/Edit/Delete actions, so they belong here rather than on the
+    // Permission matrix's Role management / User management rows.
+    {cat:'User management', key:'bulkUserUpload', label:'Bulk user upload'},
+    {cat:'User management', key:'bulkUserTemplate', label:'CSV template download'},
+    {cat:'User management', key:'userDetail', label:'View user detail page'},
+    {cat:'User management', key:'activeUsers', label:'Filter active/inactive users'},
+    {cat:'User management', key:'attempts', label:'Track login attempts'},
+    {cat:'User management', key:'showAttempts', label:'Display login attempt history'},
+    {cat:'User management', key:'resetPassword', label:"Reset a user's password"},
+    {cat:'User management', key:'exportDetail', label:'Export user list/detail'},
+  ];
+  const ROLE_FEATURE_CATEGORIES = (()=>{
+    const cats = [];
+    ROLE_FEATURE_CATALOGUE.forEach(f=>{ if(!cats.includes(f.cat)) cats.push(f.cat); });
+    return cats;
+  })();
+
+  // Org ceiling: a flag the org hasn't enabled cannot be granted to any role. Where a role-catalogue
+  // key already exists in the org's Feature-management state (orgFeatureState, seeded from
+  // FLAG_CATALOGUE above), that live state is the source of truth. A couple of role-catalogue keys
+  // (the org+user tab-visibility bundle) aren't modeled as a flat Feature-management flag yet in this
+  // prototype -- ORG_DISABLED_STUB is an explicit, swappable placeholder for those only. Do not
+  // hardcode assumptions about any real org's flag configuration here.
+  //
+  // The six userAcceptance-sourced User management keys (userDetail, activeUsers, attempts,
+  // showAttempts, resetPassword, exportDetail) are deliberately absent from both orgFeatureState and
+  // ORG_DISABLED_STUB: that payload has no org/role distinction, so there is no data confirming an
+  // org can disable any of them. isFlagOrgEnabled() falling through to `true` for them is intentional
+  // -- do not add them to ORG_DISABLED_STUB speculatively; wait for a confirmed org-level toggle.
+  const ORG_DISABLED_STUB = ['dataOnlyView'];
+  function isFlagOrgEnabled(key){
+    if(key in orgFeatureState) return !!orgFeatureState[key];
+    return !ORG_DISABLED_STUB.includes(key);
+  }
+
+  // ---------- Limits (role-level defaults; org-wide pool is stubbed, owned by Netlink Master's
+  // org-level Limits & AI credits screen -- not editable here) ----------
+  const ORG_POOL_STUB = { dashboards:5000, storyboards:2000, datasets:3000, sharing:10000, queries:500000, aiCredits:100000 };
+  const LIMITS_FIELDS = [
+    {key:'dashboards',  label:'Dashboard limit',  poolKey:'dashboards',  poolLabel:'dashboards'},
+    {key:'storyboards', label:'Storyboard limit',  poolKey:'storyboards', poolLabel:'storyboards'},
+    {key:'datasets',    label:'Dataset limit',     poolKey:'datasets',    poolLabel:'datasets'},
+    {key:'sharing',     label:'Sharing limit',     poolKey:'sharing',     poolLabel:'shares'},
+    {key:'queries',     label:'Query limit',       poolKey:'queries',     poolLabel:'queries'},
+    {key:'aiCredits',   label:'AI credits',        poolKey:'aiCredits',   poolLabel:'AI credits'},
+  ];
+  function defaultLimitsFor(roleId){
+    const mult = {admin:1, editor:0.4, analyst:0.2, viewer:0.05}[roleId] ?? 0.1;
+    const out = {};
+    LIMITS_FIELDS.forEach(f=>{ out[f.key] = Math.max(1, Math.round(ORG_POOL_STUB[f.poolKey]*mult)); });
+    return out;
+  }
+
+  // ---------- Per-role in-memory state ----------
+  // Holds each role's permission matrix, granted feature keys, assigned user ids and limit
+  // defaults. Populated lazily per role and never re-fetched, so edits on one tab survive
+  // switching to another tab (or to a different role and back).
+  const ROLE_STATE = {};
+  const ROLE_DEFAULT_GRANTS = {
+    admin:   ROLE_FEATURE_CATALOGUE.map(f=>f.key),
+    editor:  ['export','pptExport','sharing','ranges','quickCompare','manage','whatIfAnalytics','fileUploader','datasource','enableCSV','smartAssistance','askme','isdoYouKnow','aidashboard','aiDoYouKnow','bulkUserUpload','bulkUserTemplate','selfService','explorePanel','helpCenter','support'],
+    analyst: ['export','pptExport','sharing','ranges','quickCompare','whatIfAnalytics','smartAssistance','isdoYouKnow','helpCenter','support'],
+    viewer:  ['ranges','quickCompare','sharing','helpCenter','support'],
+  };
+  function ensureRoleState(roleId){
+    if(ROLE_STATE[roleId]) return ROLE_STATE[roleId];
+    const role = ROLES.find(r=>r.id===roleId);
+    const features = new Set((ROLE_DEFAULT_GRANTS[roleId]||[]).filter(isFlagOrgEnabled));
+    ROLE_STATE[roleId] = {
+      matrix: defaultMatrixFor(roleId),
+      features,
+      userIds: [...(role.userIds||[])],
+      limits: defaultLimitsFor(roleId),
+    };
+    return ROLE_STATE[roleId];
+  }
+  function rolesGrantingFlag(key){
+    return ROLES.filter(r=>ensureRoleState(r.id).features.has(key)).map(r=>r.name);
+  }
+
+  let currentRoleId = 'admin';
+  let currentRoleTab = 'users';
+
+  function initials(name){
+    return name.split(' ').filter(Boolean).slice(0,2).map(n=>n[0].toUpperCase()).join('');
+  }
+
+  // Role management tab has two screens: the role list (table) and a single role's detail
+  // (tabs). Editing a role navigates screens rather than swapping a side panel.
+  function renderRoleList(){
+    document.getElementById('roleListBody').innerHTML = ROLES.map(r=>{
+      const st = ensureRoleState(r.id);
+      return `<tr>
+        <td class="role-name-cell">${esc(r.name)}</td>
+        <td class="role-desc-cell">${esc(r.desc)}</td>
+        <td class="role-users-cell">${st.userIds.length} user${st.userIds.length===1?'':'s'}</td>
+        <td style="text-align:right"><button class="btn btn-sm" onclick="openRoleDetail('${r.id}')">Edit</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openRoleDetail(roleId){
+    currentRoleId = roleId;
+    currentRoleTab = 'users';
+    document.getElementById('roleListScreen').hidden = true;
+    document.getElementById('roleDetailScreen').hidden = false;
+    renderRoleDetail();
+  }
+
+  function backToRoleList(){
+    document.getElementById('roleDetailScreen').hidden = true;
+    document.getElementById('roleListScreen').hidden = false;
+    renderRoleList(); // pick up any user-count changes made in the detail screen
+  }
+
+  function selectRoleTab(btn){
+    currentRoleTab = btn.dataset.rtab;
+    document.querySelectorAll('.role-tab').forEach(t=>t.classList.toggle('active', t===btn));
+    document.querySelectorAll('.role-tabpanel').forEach(p=>p.hidden = p.id !== 'rtab-'+currentRoleTab);
+    // Deliberately no re-render here -- panels stay in the DOM across tab switches so any
+    // in-progress edits (matrix checkboxes, feature grants, limit inputs) are never rebuilt
+    // from scratch. They're also already live in ROLE_STATE via each control's own handler.
+  }
+
+  function renderRoleDetail(){
+    const role = ROLES.find(r=>r.id===currentRoleId);
+    const st = ensureRoleState(currentRoleId);
+    document.getElementById('roleDetailName').textContent = role.name;
+    document.getElementById('roleDetailCount').textContent = `${st.userIds.length} user${st.userIds.length===1?'':'s'} assigned`;
+    document.getElementById('roleDetailDesc').textContent = role.desc;
+
+    document.querySelectorAll('.role-tab').forEach(t=>t.classList.toggle('active', t.dataset.rtab===currentRoleTab));
+    document.querySelectorAll('.role-tabpanel').forEach(p=>p.hidden = p.id !== 'rtab-'+currentRoleTab);
+
+    document.getElementById('roleUserSearch').value = '';
+    document.getElementById('roleUserSearchResults').innerHTML = '';
+    renderRoleAssignedUsers();
+    renderPermMatrix();
+    renderRoleFeatureAccordion();
+    renderRoleLimits();
+  }
+
+  /* ---- Tab 1: Assigned users ---- */
+  function renderRoleAssignedUsers(){
+    const st = ensureRoleState(currentRoleId);
+    document.getElementById('roleAssignedUsers').innerHTML = st.userIds.map(uid=>{
+      const u = ORG_USERS.find(x=>x.id===uid);
+      if(!u) return '';
+      return `<div class="user-row">
+        <div class="avatar">${esc(initials(u.name))}</div>
+        <div class="user-row-info"><div class="u-name">${esc(u.name)}</div><div class="u-email">${esc(u.email)}</div></div>
+        <button class="icon-btn user-row-remove" onclick="removeUserFromRole('${u.id}')" aria-label="Remove ${esc(u.name)}"><i class="ti ti-x"></i></button>
+      </div>`;
+    }).join('') || `<div class="feat-empty">No users assigned to this role yet.</div>`;
+  }
+
+  function searchRoleUsers(input){
+    const q = input.value.trim().toLowerCase();
+    const box = document.getElementById('roleUserSearchResults');
+    if(!q){ box.innerHTML=''; return; }
+    const st = ensureRoleState(currentRoleId);
+    const results = ORG_USERS.filter(u=>!st.userIds.includes(u.id) &&
+      (u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))).slice(0,6);
+    box.innerHTML = results.length
+      ? `<div class="user-search-list">${results.map(u=>`
+          <div class="user-search-row">
+            <div class="avatar">${esc(initials(u.name))}</div>
+            <div class="user-row-info"><div class="u-name">${esc(u.name)}</div><div class="u-email">${esc(u.email)}</div></div>
+            <button class="btn btn-sm" onclick="addUserToRole('${u.id}')">Add</button>
+          </div>`).join('')}</div>`
+      : `<div class="user-search-empty">No matching users.</div>`;
+  }
+
+  function addUserToRole(uid){
+    const st = ensureRoleState(currentRoleId);
+    if(!st.userIds.includes(uid)) st.userIds.push(uid);
+    document.getElementById('roleUserSearch').value = '';
+    document.getElementById('roleUserSearchResults').innerHTML = '';
+    renderRoleAssignedUsers();
+    renderRoleList();
+    document.getElementById('roleDetailCount').textContent = `${st.userIds.length} user${st.userIds.length===1?'':'s'} assigned`;
+  }
+
+  function removeUserFromRole(uid){
+    const st = ensureRoleState(currentRoleId);
+    st.userIds = st.userIds.filter(id=>id!==uid);
+    renderRoleAssignedUsers();
+    renderRoleList();
+    document.getElementById('roleDetailCount').textContent = `${st.userIds.length} user${st.userIds.length===1?'':'s'} assigned`;
+  }
+
+  /* ---- Tab 2: Permission matrix (module-level RBAC; independent of Feature access) ---- */
+  function renderPermMatrix(){
+    const st = ensureRoleState(currentRoleId);
+    document.getElementById('permMatrixBody').innerHTML = PERM_MODULES.map(mod=>{
+      const perms = st.matrix[mod];
+      const keys = MODULE_PERM_KEYS[mod];
+      return `<tr>
+        <td>${esc(mod)}</td>
+        ${PERM_ACTIONS.map(action=>{
+          const keyName = keys && keys[action];
+          const titleAttr = keyName ? ` title="${esc(keyName)}"` : '';
+          return `<td><input type="checkbox" ${perms[action]?'checked':''}${titleAttr} onchange="togglePermMatrix('${esc(mod)}','${action}',this)"></td>`;
+        }).join('')}
+      </tr>`;
+    }).join('');
+  }
+
+  function togglePermMatrix(mod, action, input){
+    const st = ensureRoleState(currentRoleId);
+    st.matrix[mod][action] = input.checked;
+  }
+
+  /* ---- Tab 3: Feature access (role-scoped; reads Feature management's org state, never writes it) ---- */
+  function renderRoleFeatureAccordion(){
+    const st = ensureRoleState(currentRoleId);
+    document.getElementById('roleFeatureAccordion').innerHTML = ROLE_FEATURE_CATEGORIES.map(cat=>{
+      const flags = ROLE_FEATURE_CATALOGUE.filter(f=>f.cat===cat);
+      const grantedCount = flags.filter(f=>isFlagOrgEnabled(f.key) && st.features.has(f.key)).length;
+      const rows = flags.map(f=>roleFeatureRowHtml(f, st)).join('');
+      return `<section class="acc" data-cat="${esc(cat)}">
+        <button class="acc-head" aria-expanded="false" onclick="toggleAccordion(this)">
+          <i class="ti ${CAT_ICON[cat]||'ti-list'} acc-icon"></i>
+          <span class="acc-title">${esc(cat)}</span>
+          <span class="acc-count">${grantedCount} of ${flags.length} granted</span>
+          <i class="ti ti-chevron-down acc-chev"></i>
+        </button>
+        <div class="acc-body" hidden>${rows}</div>
+      </section>`;
+    }).join('');
+    const s = document.getElementById('roleFeatureSearch');
+    if(s) s.value = '';
+    document.getElementById('roleFeatureEmpty').hidden = true;
+  }
+
+  function roleFeatureRowHtml(f, st){
+    const orgOn = isFlagOrgEnabled(f.key);
+    const checked = orgOn && st.features.has(f.key);
+    const search = (f.label+' '+f.key).toLowerCase();
+    return `<div class="role-flag-row ${orgOn?'':'disabled'}" data-name="${esc(search)}">
+      <label class="role-flag-checklabel">
+        <input type="checkbox" ${checked?'checked':''} ${orgOn?'':'disabled'} onchange="toggleRoleFeature('${f.key}',this)">
+        <span class="role-flag-name">${esc(f.label)}<span class="feat-key">${f.key}</span></span>
+      </label>
+      ${orgOn?'':'<span class="badge orgoff">(off at org level)</span>'}
+    </div>`;
+  }
+
+  function toggleRoleFeature(key, input){
+    const st = ensureRoleState(currentRoleId);
+    if(input.checked) st.features.add(key); else st.features.delete(key);
+    updateRoleFeatureCounts(); // update counts in place -- avoid a full re-render that would
+                                // collapse open accordion sections / clear the active search
+  }
+
+  function updateRoleFeatureCounts(){
+    const st = ensureRoleState(currentRoleId);
+    document.querySelectorAll('#roleFeatureAccordion .acc').forEach(section=>{
+      const flags = ROLE_FEATURE_CATALOGUE.filter(f=>f.cat===section.dataset.cat);
+      const grantedCount = flags.filter(f=>isFlagOrgEnabled(f.key) && st.features.has(f.key)).length;
+      section.querySelector('.acc-count').textContent = `${grantedCount} of ${flags.length} granted`;
+    });
+  }
+
+  // Global search across every category: expand only matching sections, collapse the rest,
+  // reveal only matching rows, then scroll to + flash the first hit. Mirrors featureSearchAll().
+  function roleFeatureSearchAll(input){
+    const q = input.value.trim().toLowerCase();
+    const sections = document.querySelectorAll('#roleFeatureAccordion .acc');
+    let totalMatches = 0, firstHit = null;
+
+    sections.forEach(section=>{
+      const rows = section.querySelectorAll('.role-flag-row');
+      let sectionMatches = 0;
+      rows.forEach(row=>{
+        row.classList.remove('feat-hit');
+        const match = !q || row.dataset.name.includes(q);
+        row.hidden = q ? !match : false;
+        if(q && match){ sectionMatches++; if(!firstHit) firstHit = row; }
+      });
+      if(q){ setAccordionOpen(section, sectionMatches > 0); totalMatches += sectionMatches; }
+      else { setAccordionOpen(section, false); } // cleared search -> collapse everything
+    });
+
+    document.getElementById('roleFeatureEmpty').hidden = !q || totalMatches > 0;
+    if(firstHit){
+      firstHit.scrollIntoView({behavior:'smooth', block:'center'});
+      void firstHit.offsetWidth;
+      firstHit.classList.add('feat-hit');
+    }
+  }
+
+  /* ---- Tab 4: Limits (role-level defaults; org-wide pool is read-only reference here) ---- */
+  function renderRoleLimits(){
+    const st = ensureRoleState(currentRoleId);
+    document.getElementById('roleLimitsBody').innerHTML = LIMITS_FIELDS.map(f=>{
+      const val = st.limits[f.key];
+      const pool = ORG_POOL_STUB[f.poolKey];
+      const pct = pool ? Math.round((val/pool)*100) : 0;
+      return `<div class="limit-row">
+        <div class="limit-row-main">
+          <label class="feat-label">${esc(f.label)}</label>
+          <div class="limit-pool-note">${pct}% of org pool (${pool.toLocaleString()} ${esc(f.poolLabel)})</div>
+        </div>
+        <input class="feat-input limit-input" type="number" min="0" value="${val}" onchange="updateRoleLimit('${f.key}',this)">
+      </div>`;
+    }).join('');
+  }
+
+  function updateRoleLimit(key, input){
+    const st = ensureRoleState(currentRoleId);
+    const v = Number(input.value);
+    st.limits[key] = isNaN(v) ? 0 : v;
+    renderRoleLimits(); // recompute % of org pool against the new value
+  }
+
+  /* ============================================================
+     New organization wizard — 4-step create flow.
+     Uses its own WIZARD_FLAG_CATALOGUE (a trimmed subset shaped like
+     FLAG_CATALOGUE) and its own in-memory wizardState. Nothing here
+     writes to the shared orgFeatureState / ROLES / ORG_POOL_STUB —
+     the collected data is stashed on the new org object itself.
+     ============================================================ */
+  const WIZARD_FLAG_CATALOGUE = [
+    // ---------- Dashboard & Storyboard ----------
+    {cat:'Dashboard & Storyboard', key:'manage',          name:'Manage option',    ui:'toggle', value:true,  desc:'Enable the Manage option on the landing page.'},
+    {cat:'Dashboard & Storyboard', key:'schedule',        name:'Schedule',         ui:'toggle', value:true,  desc:'Enable scheduled dashboard delivery.'},
+    {cat:'Dashboard & Storyboard', key:'quickCompare',    name:'Quick Compare',    ui:'toggle', value:true,  desc:'Enable Quick Compare across dashboards.'},
+    {cat:'Dashboard & Storyboard', key:'whatIfAnalytics', name:'What-If Analytics',ui:'toggle', value:false, desc:'Enable What-If Analytics.'},
+    {cat:'Dashboard & Storyboard', key:'kpiTabLimit',     name:'KPI tab limit',    ui:'number', value:100, suffix:'tabs', desc:'Maximum KPI tabs per dashboard.'},
+
+    // ---------- Data Module ----------
+    {cat:'Data Module', key:'fileUploader',   name:'File uploader',        ui:'toggle', value:true,  desc:'Enable file uploads into the Data module.'},
+    {cat:'Data Module', key:'datasource',     name:'Data source',          ui:'toggle', value:true,  desc:'Enable external data source connections.'},
+    {cat:'Data Module', key:'enableCSV',      name:'Enable CSV',           ui:'toggle', value:true,  desc:'Enable CSV import / export.'},
+    {cat:'Data Module', key:'dataManagement', name:'Data management module',ui:'toggle', value:false, desc:'Enable the Data management module.'},
+
+    // ---------- Sharing & Collaboration ----------
+    {cat:'Sharing & Collaboration', key:'export',    name:'Export',       ui:'toggle', value:true,  desc:'Enable export feature.'},
+    {cat:'Sharing & Collaboration', key:'sharing',   name:'Sharing',      ui:'toggle', value:true,  desc:'Enable sharing of dashboards and storyboards.'},
+    {cat:'Sharing & Collaboration', key:'shareLimit',name:'Share limit',  ui:'number', value:1000, suffix:'shares', desc:'Maximum active shares for this organization.'},
+
+    // ---------- Embed ----------
+    {cat:'Embed', key:'embed',      name:'Embed',            ui:'toggle', value:false, desc:'Enable embedding of dashboards.'},
+    {cat:'Embed', key:'demo_askme', name:'Ask Me embed link',ui:'toggle', value:false, desc:'Expose Ask Me as an embed link.'},
+
+    // ---------- Others (representative Product / Security / AI toggles) ----------
+    {cat:'Others', key:'smartAssistance', name:'Smart assistance', ui:'toggle', value:true,  desc:'Enable smart assistance.'},
+    {cat:'Others', key:'askme',           name:'Ask Me service',   ui:'toggle', value:true,  desc:'Enable the Ask Me service.'},
+    {cat:'Others', key:'ssoLoginEnabled', name:'Microsoft SSO login', ui:'toggle', value:false, desc:'Enable Microsoft SSO authentication.'},
+    {cat:'Others', key:'helpCenter',      name:'Help center',      ui:'toggle', value:true,  desc:'Enable the in-product help center.'},
+  ];
+
+  const WIZARD_STEPS = ['Org details','Features & Limits','Sub-licenses','Review & Save'];
+  const WIZARD_CATEGORIES = ['Dashboard & Storyboard','Data Module','Sharing & Collaboration','Embed','Others'];
+  // Sub-license limit fields — reuse LIMITS_FIELDS labels, minus the org-wide AI credits pool.
+  const WIZ_SUBLIC_FIELDS = LIMITS_FIELDS.filter(f=>f.key!=='aiCredits');
+
+  const wizardState = { step:1, name:'', logo:null, enabled:{}, values:{}, aiCredits:100000, subLicenses:[] };
+
+  function openNewOrgWizard(){
+    wizardState.step = 1;
+    wizardState.name = '';
+    wizardState.logo = null;
+    wizardState.enabled = {};
+    wizardState.values = {};
+    WIZARD_FLAG_CATALOGUE.forEach(f=>{
+      if(f.ui==='toggle'){ wizardState.enabled[f.key] = !!f.value; }
+      else if(f.ui==='number'){ wizardState.enabled[f.key] = true; wizardState.values[f.key] = f.value; }
+    });
+    wizardState.aiCredits = 100000;
+    wizardState.subLicenses = [];
+    document.getElementById('screen-orgs').hidden = true;
+    document.getElementById('screen-context').hidden = true;
+    document.getElementById('screen-new-org-wizard').hidden = false;
+    renderWizard();
+    window.scrollTo(0,0);
+  }
+
+  function closeNewOrgWizard(){
+    document.getElementById('screen-new-org-wizard').hidden = true;
+    document.getElementById('screen-orgs').hidden = false;
+    window.scrollTo(0,0);
+  }
+
+  function renderWizard(){
+    renderWizardSteps();
+    renderWizardBody();
+    updateWizardFooter();
+  }
+
+  function renderWizardSteps(){
+    document.getElementById('wizardSteps').innerHTML = WIZARD_STEPS.map((label,i)=>{
+      const n = i+1;
+      const cls = n===wizardState.step ? 'active' : (n<wizardState.step ? 'done' : '');
+      const num = n<wizardState.step ? '<i class="ti ti-check"></i>' : n;
+      const line = i<WIZARD_STEPS.length-1 ? '<div class="wiz-step-line"></div>' : '';
+      return `<div class="wiz-step ${cls}"><span class="wiz-num">${num}</span><span class="wiz-step-label">${esc(label)}</span></div>${line}`;
+    }).join('');
+  }
+
+  function renderWizardBody(){
+    const b = document.getElementById('wizardBody');
+    if(wizardState.step===1)      b.innerHTML = wizardStep1Html();
+    else if(wizardState.step===2) b.innerHTML = wizardStep2Html();
+    else if(wizardState.step===3) b.innerHTML = wizardStep3Html();
+    else                          b.innerHTML = wizardStep4Html();
+  }
+
+  function wizInitials(){
+    const n = wizardState.name.trim();
+    if(!n) return '<i class="ti ti-building"></i>';
+    return esc(n.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase());
+  }
+
+  /* ---------- Step 1: Org details ---------- */
+  function wizardStep1Html(){
+    return `
+      <div class="wiz-field">
+        <label class="feat-label">Organization name <span class="wiz-req">*</span></label>
+        <input class="feat-input" type="text" value="${esc(wizardState.name)}" placeholder="e.g. Acme Health Systems"
+               oninput="wizardState.name=this.value; updateWizardFooter()">
+      </div>
+      <div class="wiz-field">
+        <label class="feat-label">Logo</label>
+        <div class="logo-row">
+          <div class="logo-thumb">${wizInitials()}</div>
+          <div class="logo-file">${wizardState.logo ? esc(wizardState.logo) : 'No logo uploaded'}</div>
+          <button class="btn btn-sm" style="margin-left:auto" onclick="wizardUploadLogo()"><i class="ti ti-upload"></i> Upload logo</button>
+        </div>
+      </div>`;
+  }
+
+  function wizardUploadLogo(){
+    // Placeholder-only upload (no real file handling in this prototype).
+    wizardState.logo = 'org-logo.png';
+    renderWizardBody();
+  }
+
+  /* ---------- Step 2: Features & Limits ---------- */
+  function wizToggleHtml(key){
+    const on = !!wizardState.enabled[key];
+    return `<button class="toggle ${on?'on':''}" onclick="wizFlipToggle(this,'${key}')" aria-label="Toggle ${esc(key)}"></button>`;
+  }
+
+  function wizFlipToggle(btn, key){
+    wizardState.enabled[key] = !wizardState.enabled[key];
+    btn.classList.toggle('on', wizardState.enabled[key]);
+    const field = btn.closest('.feat-card').querySelector('[data-numfield]');
+    if(field){
+      field.hidden = !wizardState.enabled[key];
+      const input = field.querySelector('input');
+      if(!wizardState.enabled[key]){
+        wizardState.values[key] = '';
+        input.value = '';
+      }
+    }
+  }
+
+  function wizFeatureCardHtml(f){
+    const head = `<div class="feat-card-head"><span class="feat-name">${esc(f.name)}<span class="feat-key">${f.key}</span></span>${wizToggleHtml(f.key)}</div>`;
+    const desc = `<div class="feat-desc">${esc(f.desc||'')}</div>`;
+    if(f.ui==='number'){
+      const on = !!wizardState.enabled[f.key];
+      const field = `<div class="feat-field" data-numfield="${f.key}" ${on?'':'hidden'}>
+        <div class="feat-suffix"><input class="feat-input" type="number" style="max-width:200px" value="${on?wizardState.values[f.key]:''}"
+             oninput="wizardState.values['${f.key}']=this.value">${f.suffix?`<span>${esc(f.suffix)}</span>`:''}</div></div>`;
+      return `<div class="feat-card">${head}${desc}${field}</div>`;
+    }
+    return `<div class="feat-card">${head}${desc}</div>`;
+  }
+
+  function wizardStep2Html(){
+    let html = `
+      <div class="feat-card" style="margin-bottom:16px">
+        <div class="feat-card-head"><span class="feat-name">AI Credits<span class="feat-key">aiCredits</span></span></div>
+        <div class="feat-desc">Org-wide shared AI credit pool for this organization — not tied to any single feature.</div>
+        <div class="feat-field"><div class="feat-suffix">
+          <input class="feat-input" type="number" style="max-width:220px" value="${wizardState.aiCredits}" oninput="wizardState.aiCredits=this.value"><span>credits</span>
+        </div></div>
+      </div>`;
+    html += WIZARD_CATEGORIES.map(c=>{
+      const flags = WIZARD_FLAG_CATALOGUE.filter(f=>f.cat===c);
+      const cards = flags.map(wizFeatureCardHtml).join('');
+      const icon = CAT_ICON[c] || 'ti-dots';
+      return `<section class="acc" data-cat="${esc(c)}">
+        <button class="acc-head" aria-expanded="false" onclick="toggleAccordion(this)">
+          <i class="ti ${icon} acc-icon"></i>
+          <span class="acc-title">${esc(c)}</span>
+          <span class="acc-count">${flags.length}</span>
+          <i class="ti ti-chevron-down acc-chev"></i>
+        </button>
+        <div class="acc-body" hidden>${cards}</div>
+      </section>`;
+    }).join('');
+    return html;
+  }
+
+  /* ---------- Step 3: Sub-licenses ---------- */
+  function wizSublicCardHtml(sl, i){
+    return `<div class="sublic-card">
+      <div class="sublic-head">
+        <input class="feat-input" type="text" placeholder="Sub-license name" value="${esc(sl.name||'')}"
+               oninput="wizardState.subLicenses[${i}].name=this.value; updateWizardFooter()">
+        <button class="btn btn-sm" style="margin-left:auto" onclick="wizardRemoveSubLicense(${i})"><i class="ti ti-trash"></i> Remove</button>
+      </div>
+      <div class="sublic-grid">
+        ${WIZ_SUBLIC_FIELDS.map(f=>`<div class="feat-field"><label class="feat-label">${esc(f.label)}</label>
+          <input class="feat-input" type="number" value="${sl[f.key]??''}" oninput="wizardState.subLicenses[${i}]['${f.key}']=this.value"></div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  function wizardStep3Html(){
+    let html = '';
+    if(wizardState.subLicenses.length===0){
+      html += `<div class="feat-empty" style="padding:14px 0">No sub-licenses yet. Add at least one to continue.</div>`;
+    }
+    html += wizardState.subLicenses.map(wizSublicCardHtml).join('');
+    html += `<button class="btn" onclick="wizardAddSubLicense()"><i class="ti ti-plus"></i> Add sub-license</button>`;
+    html += `<div class="wiz-inline-msg" id="wizSubMsg" hidden><i class="ti ti-alert-circle"></i> Add at least one sub-license with a name before you can continue.</div>`;
+    return html;
+  }
+
+  function wizardAddSubLicense(){
+    wizardState.subLicenses.push({name:''});
+    renderWizardBody();
+    updateWizardFooter();
+  }
+
+  function wizardRemoveSubLicense(i){
+    wizardState.subLicenses.splice(i,1);
+    renderWizardBody();
+    updateWizardFooter();
+  }
+
+  function wizardStep3Valid(){
+    return wizardState.subLicenses.some(sl=>(sl.name||'').trim()!=='');
+  }
+
+  /* ---------- Step 4: Review & Save ---------- */
+  function wizardStep4Html(){
+    const catRows = WIZARD_CATEGORIES.map(c=>{
+      const flags = WIZARD_FLAG_CATALOGUE.filter(f=>f.cat===c);
+      const n = flags.filter(f=>wizardState.enabled[f.key]).length;
+      return `<div class="wiz-review-row"><span class="rv-label">${esc(c)}</span><span class="rv-val mono">${n} / ${flags.length}</span></div>`;
+    }).join('');
+
+    const subs = wizardState.subLicenses.filter(sl=>(sl.name||'').trim()!=='');
+    const subRows = subs.length ? subs.map(sl=>{
+      const limits = WIZ_SUBLIC_FIELDS.map(f=>`${esc(f.label)}: ${sl[f.key]!==undefined && sl[f.key]!=='' ? esc(sl[f.key]) : '—'}`).join(' · ');
+      return `<div class="wiz-review-row"><span class="rv-label">${esc(sl.name)}<div class="org-id" style="margin-top:3px">${limits}</div></span></div>`;
+    }).join('') : `<div class="wiz-review-row"><span class="rv-label">No sub-licenses</span></div>`;
+
+    return `
+      <div class="wiz-review-block">
+        <h3>Organization</h3>
+        <div class="wiz-review-list">
+          <div class="wiz-review-row"><span class="rv-label">Name</span><span class="rv-val">${esc(wizardState.name)||'—'}</span></div>
+          <div class="wiz-review-row"><span class="rv-label">Logo</span><span class="rv-val mono">${wizardState.logo ? esc(wizardState.logo) : '—'}</span></div>
+        </div>
+      </div>
+      <div class="wiz-review-block">
+        <h3>Features enabled by category</h3>
+        <div class="wiz-review-list">
+          ${catRows}
+          <div class="wiz-review-row"><span class="rv-label">AI Credits</span><span class="rv-val mono">${esc(wizardState.aiCredits)||'—'}</span></div>
+        </div>
+      </div>
+      <div class="wiz-review-block">
+        <h3>Sub-licenses (${subs.length})</h3>
+        <div class="wiz-review-list">${subRows}</div>
+      </div>`;
+  }
+
+  function wizardSave(){
+    const wizardFeatures = {};
+    WIZARD_FLAG_CATALOGUE.forEach(f=>{
+      if(f.ui==='toggle'){ wizardFeatures[f.key] = !!wizardState.enabled[f.key]; }
+      else if(f.ui==='number' && wizardState.enabled[f.key]){ wizardFeatures[f.key] = wizardState.values[f.key]; }
+    });
+    const newOrg = {
+      id:'ORG-'+Math.floor(10000+Math.random()*90000),
+      name: wizardState.name.trim(),
+      parent:'', industry:'—', plan:'Custom', users:0, active:true,
+      wizardFeatures,
+      wizardAiCredits: wizardState.aiCredits,
+      subLicenses: wizardState.subLicenses.filter(sl=>(sl.name||'').trim()!==''),
+    };
+    orgs.push(newOrg);
+    renderOrgs();
+    document.getElementById('screen-new-org-wizard').hidden = true;
+    manageOrg(newOrg, 'users');
+  }
+
+  /* ---------- Navigation + footer ---------- */
+  function updateWizardFooter(){
+    const back = document.getElementById('wizBack');
+    const next = document.getElementById('wizNext');
+    back.disabled = wizardState.step===1;
+    const last = wizardState.step===4;
+    next.innerHTML = last ? '<i class="ti ti-check"></i> Save & open org' : 'Next <i class="ti ti-arrow-right"></i>';
+
+    let ok = true;
+    if(wizardState.step===1) ok = wizardState.name.trim()!=='';
+    if(wizardState.step===3) ok = wizardStep3Valid();
+    next.disabled = !ok;
+
+    const msg = document.getElementById('wizSubMsg');
+    if(msg) msg.hidden = !(wizardState.step===3 && !wizardStep3Valid());
+  }
+
+  function wizardNext(){
+    if(wizardState.step===4){ wizardSave(); return; }
+    wizardState.step++;
+    renderWizard();
+    window.scrollTo(0,0);
+  }
+
+  function wizardBack(){
+    if(wizardState.step>1){
+      wizardState.step--;
+      renderWizard();
+      window.scrollTo(0,0);
+    }
+  }
+
+  renderOrgs();
+  renderFeatureManagement();
+  renderBilling();
+  renderRoleList();
+</script>
+</body>
+</html>
